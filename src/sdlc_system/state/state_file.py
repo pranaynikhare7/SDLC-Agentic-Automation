@@ -37,3 +37,16 @@ class SDLCState(TypedDict):
     design_documents_feedback: str
     design_documents_review_status: str
     
+    # Phase 3: Code Generation and Review
+    code_generated: str
+    code_review_comments: str
+    code_review_feedback: str
+    code_review_status: str
+
+    # Phase 4: Security Review
+    security_recommendations: str
+    security_review_comments: str
+    security_review_status: str
+
+    
+    

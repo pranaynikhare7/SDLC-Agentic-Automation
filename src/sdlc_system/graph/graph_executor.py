@@ -75,15 +75,28 @@ class GraphExecutor:
                 saved_state['user_stories_review_status'] = status
                 saved_state['user_stories_feedback'] = feedback
                 node_name = "review_user_stories"
-                saved_state['next_node'] = "review_user_stories" if status == "feedback" else "review_design_documents"  #"review_design_documents"
+                saved_state['next_node'] = "review_user_stories" if status == "feedback" else "review_design_documents" 
 
             elif review_type == "review_design_documents":
                 saved_state['design_documents_review_status'] = status
                 saved_state['design_documents_feedback'] = feedback
                 node_name = "review_design_documents"
-                saved_state['next_node'] = "review_design_documents" if status == "feedback" else "END"   #const.REVIEW_CODE
-                         
+                saved_state['next_node'] = "review_design_documents" if status == "feedback" else "review_code"   
+
+            elif review_type == "review_code":
+                saved_state['code_review_status'] = status
+                saved_state['code_review_feedback'] = feedback
+                node_name = "code_review"
+                saved_state['next_node'] = "review_code" if status == "feedback" else "review_security_recommendations"
+                
+            elif review_type == "review_security_recommendations":
+                saved_state['security_review_status'] = status
+                saved_state['security_review_comments'] = feedback
+                node_name = "security_review"   
+                saved_state['next_node'] = "review_security_recommendations" if status == "feedback" else "END"     # const.REVIEW_TEST_CASES
+                    
             else:
                 raise ValueError(f"Unsupported review type: {review_type}")
             
+
         return self.update_and_resume_graph(saved_state,task_id,node_name)
