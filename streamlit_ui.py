@@ -1,5 +1,4 @@
 import streamlit as st
-import os
 from langchain_groq import ChatGroq
 from src.sdlc_system.graph.build_graph import GraphBuilder
 from src.sdlc_system.graph.graph_executor import GraphExecutor
@@ -11,7 +10,6 @@ st.set_page_config(page_title="AI SDLC Designer", layout="wide")
 # --- Initialize Backend ---
 @st.cache_resource
 def get_executor():
-    # Initialize your LLM here
     llm = ChatGroq(model='openai/gpt-oss-20b')
     builder = GraphBuilder(llm)
     graph = builder.setup_graph()
@@ -21,7 +19,6 @@ executor = get_executor()
 
 # --- Helper: Sync UI State with Redis ---
 def sync_state(task_id):
-    """Fetch the latest state from Redis and update UI session state."""
     latest_state = get_state_from_redis(task_id)
     if latest_state:
         st.session_state.current_state = latest_state
@@ -39,9 +36,12 @@ with st.sidebar:
     
     if st.session_state.get("task_id"):
         st.success(f"Active Session: `{st.session_state.task_id}`")
+        st.info(f"Current Node: `{st.session_state.current_state.get('next_node', 'Start')}`")
         if st.button("Clear / New Project"):
             st.session_state.clear()
             st.rerun()
+
+# --- WORKFLOW ROUTING ---
 
 # Stage 1: New Project Initialization
 if "task_id" not in st.session_state:
@@ -65,12 +65,10 @@ elif not st.session_state.current_state.get("user_stories"):
             st.session_state.current_state = response["state"]
             st.rerun()
 
-# Stage 3: Review & Approval Loop
-else:
-    st.subheader("📋 Review Generated User Stories")
+# Stage 3: Review User Stories
+elif not st.session_state.current_state.get("design_documents"):
+    st.subheader("📋 Phase 1: Review User Stories")
     stories_data = st.session_state.current_state["user_stories"]
-    
-    # Handle both Pydantic objects or dicts coming back from Redis
     stories = stories_data.user_stories if hasattr(stories_data, 'user_stories') else stories_data['user_stories']
 
     for story in stories:
@@ -79,19 +77,50 @@ else:
             st.caption(f"Priority: {story['priority'] if isinstance(story, dict) else story.priority}")
 
     st.divider()
-
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("✅ Approve", use_container_width=True):
-            response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_user_stories")
-            st.session_state.current_state = response["state"]
-            st.success("Workflow finished and saved to Redis!")
-            st.balloons()
-
+        if st.button("✅ Approve Stories", use_container_width=True):
+            with st.spinner("Moving to Design Phase..."):
+                response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_user_stories")
+                st.session_state.current_state = response["state"]
+                st.rerun()
     with col2:
-        with st.popover("🔄 Revision Required"):
-            feedback = st.text_area("What needs improvement?")
-            if st.button("Submit Feedback"):
+        with st.popover("🔄 Revise Stories"):
+            feedback = st.text_area("What should change in stories?")
+            if st.button("Submit Story Feedback"):
                 response = executor.graph_review_flow(st.session_state.task_id, "feedback", feedback, "review_user_stories")
+                st.session_state.current_state = response["state"]
+                st.rerun()
+
+# Stage 4: Review Design Documents
+else:
+    st.subheader("🏗️ Phase 2: Design Documents")
+    design_data = st.session_state.current_state["design_documents"]
+    
+    # Handle dict vs Pydantic from Redis
+    func_doc = design_data.functional if hasattr(design_data, 'functional') else design_data.get('functional', '')
+    tech_doc = design_data.technical if hasattr(design_data, 'technical') else design_data.get('technical', '')
+
+    tab1, tab2 = st.tabs(["📄 Functional Design", "💻 Technical Design"])
+    
+    with tab1:
+        st.markdown(func_doc)
+    
+    with tab2:
+        st.markdown(f"```markdown\n{tech_doc}\n```")
+
+    st.divider()
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("✅ Approve Design", use_container_width=True):
+            response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_design_documents")
+            st.session_state.current_state = response["state"]
+            st.success("All designs approved! Workflow complete.")
+            st.balloons()
+    with col2:
+        with st.popover("🔄 Revise Design"):
+            feedback = st.text_area("What should change in design?")
+            if st.button("Submit Design Feedback"):
+                response = executor.graph_review_flow(st.session_state.task_id, "feedback", feedback, "review_design_documents")
                 st.session_state.current_state = response["state"]
                 st.rerun()
