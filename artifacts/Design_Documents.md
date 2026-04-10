@@ -1,226 +1,240 @@
-# Design Documents for Calculator
+# Design Documents for Simple Calculator App
 
 ## Functional Design Document
-# Functional Design Document: Calculator
+# Functional Design Document: Simple Calculator App
 
 ## 1. Overview and Objectives
-
-The purpose of this Functional Design Document (FDD) is to outline the requirements and specifications for a simple calculator application developed in Python. The primary objective is to address users' needs for performing basic arithmetic operations, focusing solely on addition.
+The purpose of this document is to outline the functional requirements and design considerations for the Simple Calculator App. The main objective is to create a command-line calculator that allows users to perform basic arithmetic operations efficiently and effectively.
 
 ## 2. Scope Definition
+The scope of the Simple Calculator App includes:
+- Implementation of basic arithmetic operations: addition, subtraction, multiplication, and division.
+- Development entirely in Python, leveraging built-in functionalities.
+- Command-line interface for user interactions without any graphical user interface.
+- Maintaining minimal code complexity for ease of understanding and maintenance.
 
-This project aims to create:
-- A console-based calculator application
-- Functionality limited to addition (two or more numbers)
-- A lightweight codebase with fewer than 50 lines of code
-- A program that accepts both integer and floating-point inputs without a graphical interface
-
-### Exclusions
-- No user interface (GUI)
-- Any functionalities apart from addition
+### Out of Scope:
+- Any advanced mathematical functions (e.g., trigonometric functions).
+- Graphical user interfaces (GUIs).
+- Support for various user authentication or data persistence.
 
 ## 3. Roles and Access Control
+### Roles:
+- **End User**: Can perform calculations through the command-line interface.
+- **Developer**: Responsible for implementing and maintaining the codebase.
 
-### Roles
-- **Product Analyst**: Responsible for gathering requirements and ensuring they meet user needs.
-- **Developer**: Implements the code based on outlined specifications.
-  
-### Access Control
-- The application is accessible via the command-line interface (CLI) and does not require user authentication.
+### Access Control:
+- Users interact with the calculator through a public command-line interface.
+- Developers have access to the source code for maintenance and improvements.
 
 ## 4. Functional Requirements Analysis
+### Basic Functionality
+- **User Story**: As a user, I want to perform basic arithmetic operations.
+  - **Acceptance Criteria**: 
+    - The calculator accurately performs addition, subtraction, multiplication, and division.
+    - Each operation returns the expected result.
 
-### Feature Set
-- **Addition Functionality**
-  - Accepts two numbers as input from the user.
-  - Outputs the result of the sum.
-  - Handles both integers and floating-point numbers.
+### Application in Python
+- **User Story**: As a developer, I want to implement the calculator in Python.
+  - **Acceptance Criteria**: 
+    - The app is developed using Python and standard libraries.
+    - The implementation adheres to best practices.
 
-### Use Cases
-1. User enters two integer inputs.
-2. User enters two floating-point inputs.
-3. User enters one integer and one floating-point input.
+### No UI
+- **User Story**: As a user, I want to use a CLI rather than a GUI.
+  - **Acceptance Criteria**: 
+    - Users can input operations and receive results in the CLI.
+    - Users can quit the application easily.
+
+### Should Not Be Code Heavy
+- **User Story**: As a developer, I want the code to be minimal and efficient.
+  - **Acceptance Criteria**: 
+    - The codebase does not exceed 200 lines.
+    - Functions are modular and well-commented.
+    - Avoid unnecessary complexity and adhere to the DRY principle.
 
 ## 5. User Interface and Experience Guidelines
-
-### Console Interface
-- The application will operate in a command line.
-- Prompts will be displayed to the user for input.
-- Results will be printed directly to the console.
-
-### Example Interaction
-```
-Enter the first number: 5
-Enter the second number: 3.5
-The sum is: 8.5
-```
+### Command-Line Interface
+- The user interacts with the calculator via text inputs.
+- Example user interactions:
+  - Input: `2 + 3`
+  - Output: `Result: 5`
+- The application should prompt the user for inputs clearly and allow them to exit gracefully (e.g., by entering `exit`).
 
 ## 6. Business Workflow Processes
-
-1. User starts the application.
-2. The application prompts user for the first number.
-3. The application prompts user for the second number.
-4. The application computes the sum.
-5. The result is displayed to the user.
-6. The application can be exited after showing the result.
+### Workflow Steps:
+1. **Start Application**: User launches the application.
+2. **Input Operation**: User enters a mathematical expression.
+3. **Process Calculation**: The application evaluates the expression.
+4. **Display Result**: Output the result to the user.
+5. **Loop or Exit**: User can repeat the process or exit.
 
 ## 7. Data Model and Relationships
-
-### Data Input
-- User inputs (float or integer):
-  - First Number
-  - Second Number
-
-### Output
-- Result of the addition (float or integer)
+### Data Structures:
+- This application does not require complex data models as it primarily processes individual calculations.
+- Inputs from the user will be managed as strings and converted to appropriate data types for calculations.
 
 ## 8. Data Validation and Business Rules
+### Validation Rules:
+- The application should handle:
+  - Invalid mathematical expressions (e.g., `2 +`).
+  - Division by zero (e.g., `5 / 0`).
+  - Non-numeric inputs (e.g., `two + two`).
 
-- Ensure that inputs are valid numbers (either integers or floats).
-- Provide user feedback in case of invalid entries (e.g., non-numeric input).
+Each of these instances will return appropriate error messages without crashing the application.
 
 ## 9. Reporting and Analytics Requirements
-
-- No reporting or analytics features are required.
+- No reporting or analytics features are required in this project.
 
 ## 10. System Integrations and Interfaces
+- The Simple Calculator App will not integrate with any external systems or interfaces as it operates independently in a command-line environment.
 
-- No external integrations are required as this is a standalone application.
-
-## Sample Code Implementation
-
-```python
-def get_number(prompt):
-    while True:
-        try:
-            return float(input(prompt))
-        except ValueError:
-            print("Invalid input. Please enter a number.")
-
-def main():
-    print("Simple Calculator for Addition")
-    num1 = get_number("Enter the first number: ")
-    num2 = get_number("Enter the second number: ")
-    
-    result = num1 + num2
-    print(f"The sum is: {result}")
-
-if __name__ == "__main__":
-    main()
-```
-
-This implementation adheres to the requirements stated in the user stories, keeping the total lines of code under 50 while ensuring functionality is straightforward and user-friendly.
+---
+This FDD serves as a comprehensive guide for the development of the Simple Calculator App, ensuring that all functional requirements and design considerations are addressed clearly and effectively.
 
 ## Technical Design Document
-# Technical Design Document: Calculator
+# Technical Design Document: Simple Calculator App
 
 ## 1. System Architecture Overview
-The Calculator application is designed as a simple console-based program that performs basic addition operations. The architecture is minimalistic, emphasizing straightforward input, processing, and output without any graphical interfaces.
+The Simple Calculator App follows a modular architecture that enables easy maintenance and expansion. The app is executed via a Command Line Interface (CLI), allowing users to input calculations and receive results.
 
-### Flow Description
-1. User inputs two numbers.
-2. Application processes the input and performs the addition operation.
-3. Output the result to the console.
-
-```plaintext
-+--------------+
-| User Input   |
-+--------------+
-       |
-       v
-+--------------+    +------------------+
-|   Addition   |--->|     Output       |
-|  Operation   |    +------------------+
-+--------------+
+### Architecture Diagram
+```
+User Input (CLI)
+      |
+      v
++------------------+
+|   Calculator     |
+|   Core Logic     |
+|    (Functions)   |
+|                  |
+| - Addition       |
+| - Subtraction    |
+| - Multiplication |
+| - Division       |
++------------------+
+      |
+      v
+Output (Results)
 ```
 
 ## 2. Technology Stack and Rationale
 - **Programming Language**: Python
-  - **Rationale**: Python is chosen for its simplicity and readability, making it ideal for smaller applications and quick development.
-- **Execution Environment**: Console/Terminal
-  - **Rationale**: As per the requirements, no GUI is needed, making console execution sufficient.
+  - Benefits: Simplicity and ease of use for implementing basic arithmetic operations.
+- **Libraries**: 
+  - No third-party libraries needed, only standard Python libraries.
+- **Execution Environment**:
+  - Command Line Interface (CLI) for user interaction.
 
 ## 3. Data Model and Schema Design
-The application does not require a complex data model or database schema. The inputs are handled directly as variables in the application.
+The application primarily processes input as strings representing mathematical expressions. There is no complex data model or database involved. Data is handled in memory for computations.
 
-### Data Handling
-- **Input Variables**: Two numbers (supports integers and floats).
-- **Output Variable**: The sum of the two numbers.
+### Input and Output Schema
+| Input Type                | Description                       |
+|---------------------------|-----------------------------------|
+| Arithmetic Expression     | e.g., "5 + 3", "12 / 4"           |
+| Command                   | e.g., "quit", "exit"              |
+
+### Example Calculation Handling
+- Input: "5 + 3"
+- Output: 8
 
 ## 4. API Design and Specifications
-The application does not expose APIs but operates with user inputs directly via the console. It is a standalone operation without external dependencies.
+The API consists of simple function calls that process operands and operators.
 
-### Input and Output Specification
-- **Input**: 
-  - Two numbers from the user entered consecutively.
-- **Output**: 
-  - The sum displayed on the console.
+### Endpoints
+Since this is a CLI application, the "API" consists of function calls within the application, not exposed endpoints.
+
+### Functions
+- **add(x: float, y: float) -> float**
+  - Adds two numbers and returns the result.
+  
+- **subtract(x: float, y: float) -> float**
+  - Subtracts the second number from the first and returns the result.
+  
+- **multiply(x: float, y: float) -> float**
+  - Multiplies two numbers and returns the result.
+  
+- **divide(x: float, y: float) -> float**
+  - Divides the first number by the second and returns the result.
 
 ## 5. Security Architecture and Controls
-While this application does not handle sensitive data or complex transactions, input validation will be implemented to ensure that the user inputs are numeric.
+- Input validation is essential to ensure that only valid arithmetic expressions are processed.
+- The application should handle division by zero gracefully by returning an error message and prompting the user for a new calculation.
 
-### Input Validation
-- Inputs must be checked to ensure they can be converted to numbers (both integers and floats).
-  
 ## 6. Performance Optimization Strategies
-Given the simplistic nature of the application, performance optimization is not a significant concern. The focus will be on:
-- Efficient handling of user input and error messages.
-- Fast computation of the addition operation.
+- All calculations are performed in-memory and use basic arithmetic, ensuring quick performance.
+- The code will follow Python's best practices to minimize execution time.
 
 ## 7. Scalability and Reliability Approach
-The application does not need to handle large-scale operations. However, the following considerations will aid in maintaining reliability:
-- Simple error handling for non-numeric inputs.
-- Clear and concise user prompts and feedback.
+- Given that this is a simple calculator, scalability considerations mainly involve handling multiple user inputs sequentially.
+- Reliability will be ensured through input validation to prevent crashes.
 
 ## 8. Deployment and Release Strategy
-The application is intended for local execution. Steps for deployment include:
-1. Ensure Python is installed on the machine.
-2. Distribute the single Python script.
-3. Instructions for users to run the script from the console.
-
-### Execution Command
-```bash
-python calculator.py
-```
+- The application will be distributed as a Python script, which can be easily executed in any Python environment.
+- A version control system (like Git) will be used to manage code changes and releases.
 
 ## 9. External Integrations and Dependencies
-This application does not integrate with any external services or libraries. It relies solely on the Python Standard Library.
+- No external integrations are required as the application is self-contained.
+- It relies only on the Python standard library, making it lightweight and easy to maintain.
 
 ## 10. Environment Setup (Development, Testing, Production)
-The development and production environments will be consistent, only requiring Python's execution environment.
+### Development Environment
+- **Python Version**: 3.x
+- **IDE**: Any text editor or IDE (e.g., VSCode, PyCharm)
+- **Code Management**: Git for version control
 
-### Setup Instructions
-1. Install Python (preferably version 3.6 or higher).
-2. Create a file named `calculator.py`.
-3. Include the calculator code (detailed in the next section).
+### Testing Environment
+- Ad-hoc testing using Python’s built-in features, with potential for creating unit tests in the future.
 
-### Example Code Implementation
+### Production Environment
+- Deployment of the application as a simple CLI executable, ensuring it runs in any system with Python installed.
+
+## Code Example
+Below is a minimal example of the calculator logic in Python:
+
 ```python
-def add_numbers(num1, num2):
-    return num1 + num2
+def add(x, y):
+    return x + y
+
+def subtract(x, y):
+    return x - y
+
+def multiply(x, y):
+    return x * y
+
+def divide(x, y):
+    if y == 0:
+        return "Error: Division by zero."
+    return x / y
 
 def main():
-    try:
-        # Get input from user
-        num1 = float(input("Enter the first number: "))
-        num2 = float(input("Enter the second number: "))
-        
-        # Perform addition
-        result = add_numbers(num1, num2)
-        
-        # Output the result
-        print(f"The sum of {num1} and {num2} is: {result}")
+    while True:
+        user_input = input("Enter operation (or 'quit' to exit): ")
 
-    except ValueError:
-        print("Invalid input. Please enter numeric values.")
+        if user_input.lower() == 'quit':
+            break
+
+        try:
+            # Assuming input format: 'x operator y'
+            x, operator, y = user_input.split()
+            x, y = float(x), float(y)
+
+            if operator == '+':
+                print(add(x, y))
+            elif operator == '-':
+                print(subtract(x, y))
+            elif operator == '*':
+                print(multiply(x, y))
+            elif operator == '/':
+                print(divide(x, y))
+            else:
+                print("Error: Unknown operator.")
+        except ValueError:
+            print("Error: Invalid input.")
 
 if __name__ == "__main__":
     main()
 ```
 
-In this code:
-- The `add_numbers` function handles the addition logic.
-- User input is gathered and validated to ensure it is numeric.
-- The program runs in a straightforward console environment without complex dependencies, ensuring it remains under 50 lines while following Python best practices.
-
-This document serves as a comprehensive overview of the Technical Design Document for the Calculator application, ensuring clarity in design, implementation, and operational considerations.
+This code is designed to keep the complexity low while showcasing the basic functionality outlined in the user stories.

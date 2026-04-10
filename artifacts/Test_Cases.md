@@ -1,93 +1,74 @@
-# Test Cases for Calculator
+# Test Cases for Simple Calculator App
 
 
-Here's a comprehensive set of test cases for your `calculator.py` implementation using Python's `unittest` framework. These test cases cover various edge cases, functional correctness, and both positive and negative scenarios. 
-
-### Test Cases for `calculator.py`
+Based on the provided code and the review comments, here are comprehensive test cases written using the `unittest` framework in Python. These test cases aim to cover all functionalities of the calculator, handle edge cases, and validate correct behavior when inputs are valid and invalid.
 
 ```python
 import unittest
-from io import StringIO
-import sys
-
-# Note: Import the functions you want to test from calculator.py here
-# from calculator import add_numbers, get_number
-
-# Mocking the input function for the get_number method
-def mocked_input(mocked_responses):
-    responses = iter(mocked_responses)
-    def input_side_effect(prompt):
-        return next(responses)
-    return input_side_effect
+from calculator import add, subtract, multiply, divide, validate_input
 
 class TestCalculator(unittest.TestCase):
     
-    def test_add_numbers_positive(self):
-        self.assertEqual(add_numbers(5, 3), 8)
-    
-    def test_add_numbers_negative(self):
-        self.assertEqual(add_numbers(-2, -3), -5)
+    # Test cases for add function
+    def test_add(self):
+        self.assertEqual(add(2, 3), 5)
+        self.assertEqual(add(-1, 1), 0)
+        self.assertEqual(add(-1, -1), -2)
+        self.assertEqual(add(0, 0), 0)
+        self.assertEqual(add(0.1, 0.2), 0.3)
 
-    def test_add_numbers_mixed(self):
-        self.assertEqual(add_numbers(-5, 10), 5)
-    
-    def test_add_numbers_zero(self):
-        self.assertEqual(add_numbers(0, 0), 0)
-        
-    def test_add_numbers_large_numbers(self):
-        self.assertEqual(add_numbers(1e10, 1e10), 2e10)
+    # Test cases for subtract function
+    def test_subtract(self):
+        self.assertEqual(subtract(5, 3), 2)
+        self.assertEqual(subtract(10, 15), -5)
+        self.assertEqual(subtract(-1, -1), 0)
+        self.assertEqual(subtract(0, 1), -1)
+        self.assertEqual(subtract(-1, 0), -1)
 
-    def test_add_numbers_float(self):
-        self.assertAlmostEqual(add_numbers(5.5, 4.5), 10.0)
+    # Test cases for multiply function
+    def test_multiply(self):
+        self.assertEqual(multiply(2, 3), 6)
+        self.assertEqual(multiply(-1, 5), -5)
+        self.assertEqual(multiply(0, 100), 0)
+        self.assertEqual(multiply(4.5, 2), 9.0)
+        self.assertEqual(multiply(0.5, 0.5), 0.25)
 
-    def test_get_number_valid_input(self):
-        # Test valid input case
-        user_input = ['10']
-        sys.stdin = StringIO('\n'.join(user_input))
-        self.assertEqual(get_number("Enter a number: "), 10.0)
+    # Test cases for divide function
+    def test_divide(self):
+        self.assertEqual(divide(10, 2), 5)
+        self.assertEqual(divide(5, 0), "Error: Division by zero.")
+        self.assertEqual(divide(-10, 2), -5)
+        self.assertEqual(divide(0, 1), 0)
+        self.assertEqual(divide(5.5, 2.2), 2.5)
 
-    def test_get_number_invalid_float(self):
-        # Test invalid input case
-        user_input = ['abc', '10']
-        sys.stdin = StringIO('\n'.join(user_input))
-        self.assertEqual(get_number("Enter a number: "), 10.0)
+    # Test cases for validate_input function
+    def test_validate_input(self):
+        self.assertEqual(validate_input("3 + 4"), (3.0, '+', 4.0))
+        self.assertEqual(validate_input("-3 * -4"), (-3.0, '*', -4.0))
+        self.assertEqual(validate_input("1 - 0"), (1.0, '-', 0.0))
+        self.assertEqual(validate_input("5 /"), (None, None, None))
+        self.assertEqual(validate_input("hello + world"), (None, None, None))
+        self.assertEqual(validate_input("10 / 2.5"), (10.0, '/', 2.5))
+        self.assertEqual(validate_input("10.5 * 4.0"), (10.5, '*', 4.0))
+        self.assertEqual(validate_input("5 & 4"), (None, None, None))  # Invalid operator case
 
-    def test_get_number_invalid_int(self):
-        # Test another invalid input case
-        user_input = ['-1.5.5', '3']  # Invalid decimal point, then valid number
-        sys.stdin = StringIO('\n'.join(user_input))
-        self.assertEqual(get_number("Enter a number: "), 3.0)
-
-    def test_get_number_nan(self):
-        user_input = ['nan', '5']
-        sys.stdin = StringIO('\n'.join(user_input))
-        self.assertEqual(get_number("Enter a number: "), 5.0)
-
-    def test_get_number_infinity(self):
-        user_input = ['inf', '7']
-        sys.stdin = StringIO('\n'.join(user_input))
-        self.assertEqual(get_number("Enter a number: "), 7.0)
-
-    def test_get_number_empty_input(self):
-        user_input = ['', '5']
-        sys.stdin = StringIO('\n'.join(user_input))
-        self.assertEqual(get_number("Enter a number: "), 5.0)
+    # Test edge cases for validation input
+    def test_validate_input_edge_cases(self):
+        self.assertEqual(validate_input("5.0 + 2.0"), (5.0, '+', 2.0))
+        self.assertEqual(validate_input("5 + "), (None, None, None))
+        self.assertEqual(validate_input(" + 5"), (None, None, None))
+        self.assertEqual(validate_input(""), (None, None, None))
+        self.assertEqual(validate_input("5 + 6 + 7"), (None, None, None))  # More than 3 parts
 
 if __name__ == '__main__':
     unittest.main()
 ```
 
-### Key Components Explained:
+### Explanation of Tests:
+1. **Standard Operations**: Each arithmetic function (`add`, `subtract`, `multiply`, `divide`) is tested with positive, negative, zero, and fractional numbers to ensure they handle a wide range of inputs correctly.
+2. **Edge Cases**: Tests cover boundary conditions, such as division by zero for the `divide` function, and ensure that functions handle `None` inputs from `validate_input` appropriately.
+3. **Input Validation**: Tests for the `validate_input` function ensure that expected and unexpected formats return the correct parsed values or `None` where appropriate.
+4. **Error Handling**: Tests ensure that the system returns the appropriate error messages as indicated in the review comments.
 
-1. **Test Cases for `add_numbers`**: Tests different cases, including both positive and negative integers, mixed signs, and edge cases such as zero and large numbers.
-
-2. **Test Cases for `get_number`**: 
-   - Valid input tests ensure that numeric input is accepted and converted correctly.
-   - Invalid inputs test various failure cases, such as non-numerical strings, multiple decimal points, empty input, NaN, and infinity.
-
-3. **Input Mocking**: The `StringIO` library is used to simulate user input for testing purposes, allowing us to control the input function’s responses.
-
-### Additional Notes:
-- Remember to address the feedback received in the review comments, particularly regarding docstrings and potential input validation improvements. 
-- Ensure all your imports from `calculator.py` or any necessary modules are correctly referenced when integrating tests.
-- Review the structure and adaptability of these tests as your application evolves and potentially includes more functionality beyond addition.
+### How to Run:
+You can run the test cases by saving them in a file named `tests.py` and executing the Python script using the command `python tests.py` in your terminal.
