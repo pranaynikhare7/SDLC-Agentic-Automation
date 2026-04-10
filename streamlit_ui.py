@@ -43,6 +43,7 @@ with st.sidebar:
 
 # --- WORKFLOW ROUTING ---
 state = st.session_state.get("current_state", {})
+next_step = state.get("next_node")
 
 # Stage 1: New Project Initialization
 if "task_id" not in st.session_state:
@@ -54,9 +55,9 @@ if "task_id" not in st.session_state:
         st.session_state.current_state = response["state"]
         st.rerun()
 
-# Stage 2: Requirement Gathering
-elif not state.get("user_stories"):
-    st.subheader(f"Project: {state['project_name']}")
+# Stage 2: Requirement Gathering (next_node is not set yet)
+elif not next_step:
+    st.subheader(f"Project: {state.get('project_name', 'Unknown')}")
     req_input = st.text_area("Enter Requirements (one per line)", height=150)
     if st.button("Generate Stories"):
         requirements = [r.strip() for r in req_input.split("\n") if r.strip()]
@@ -66,10 +67,11 @@ elif not state.get("user_stories"):
             st.rerun()
 
 # Stage 3: Review User Stories
-elif not state.get("design_documents"):
+elif next_step == "review_user_stories":
     st.subheader("📋 Phase 1: Review User Stories")
-    stories_data = state["user_stories"]
-    stories = stories_data.user_stories if hasattr(stories_data, 'user_stories') else stories_data['user_stories']
+    stories_data = state.get("user_stories", {})
+    stories = stories_data.user_stories if hasattr(stories_data, 'user_stories') else stories_data.get('user_stories', [])
+    
     for story in stories:
         with st.expander(f"**{story['id'] if isinstance(story, dict) else story.id}**: {story['title'] if isinstance(story, dict) else story.title}"):
             st.write(story['description'] if isinstance(story, dict) else story.description)
@@ -79,22 +81,25 @@ elif not state.get("design_documents"):
     c1, c2 = st.columns(2)
     with c1:
         if st.button("✅ Approve Stories", use_container_width=True):
-            response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_user_stories")
-            st.session_state.current_state = response["state"]
-            st.rerun()
+            with st.spinner("Architecting Design Documents..."):
+                response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_user_stories")
+                st.session_state.current_state = response["state"]
+                st.rerun()
     with c2:
         with st.popover("🔄 Revise Stories"):
             fback = st.text_area("What should change in stories?")
             if st.button("Submit Story Feedback"):
-                response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_user_stories")
-                st.session_state.current_state = response["state"]
-                st.rerun()
+                with st.spinner("Revising stories..."):
+                    response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_user_stories")
+                    st.session_state.current_state = response["state"]
+                    st.rerun()
 
 # Stage 4: Review Design Documents
-elif not state.get("code_generated"):
+elif next_step == "review_design_documents":
     st.subheader("🏗️ Phase 2: Design Documents")
-    design = state["design_documents"]
+    design = state.get("design_documents", {})
     design_dict = design.model_dump() if hasattr(design, "model_dump") else design
+    
     t1, t2 = st.tabs(["📄 Functional Design", "💻 Technical Design"])
     with t1: st.markdown(design_dict.get('functional', ''))
     with t2: st.markdown(f"```markdown\n{design_dict.get('technical', '')}\n```")
@@ -103,24 +108,26 @@ elif not state.get("code_generated"):
     c1, c2 = st.columns(2)
     with c1:
         if st.button("✅ Approve Design", use_container_width=True):
-            response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_design_documents")
-            st.session_state.current_state = response["state"]
-            st.rerun()
+            with st.spinner("Generating application code..."):
+                response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_design_documents")
+                st.session_state.current_state = response["state"]
+                st.rerun()
     with c2:
         with st.popover("🔄 Revise Design"):
             fback = st.text_area("What should change in design?")
             if st.button("Submit Design Feedback"):
-                response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_design_documents")
-                st.session_state.current_state = response["state"]
-                st.rerun()
+                with st.spinner("Revising design..."):
+                    response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_design_documents")
+                    st.session_state.current_state = response["state"]
+                    st.rerun()
 
 # Stage 5: Code Review
-elif not state.get("security_recommendations"):
+elif next_step == "review_code":
     st.subheader("💻 Phase 3: Code Review")
     col_code, col_review = st.columns([2, 1])
     with col_code:
         st.markdown("**Generated Code**")
-        st.code(state.get("code_generated", ""), language="python")
+        st.code(state.get("code_generated", "# Code generation failed or returned empty"), language="python")
     with col_review:
         st.markdown("**AI Peer Review Comments**")
         st.info(state.get("code_review_comments", "No comments available."))
@@ -129,79 +136,108 @@ elif not state.get("security_recommendations"):
     c1, c2 = st.columns(2)
     with c1:
         if st.button("✅ Approve Code", use_container_width=True):
-            response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_code")
-            st.session_state.current_state = response["state"]
-            st.rerun()
+            with st.spinner("Running security review..."):
+                response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_code")
+                st.session_state.current_state = response["state"]
+                st.rerun()
     with c2:
         with st.popover("🔄 Request Code Fix"):
             fback = st.text_area("Specify changes/fixes needed:")
             if st.button("Submit Code Feedback"):
-                response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_code")
-                st.session_state.current_state = response["state"]
-                st.rerun()
+                with st.spinner("Refactoring code..."):
+                    response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_code")
+                    st.session_state.current_state = response["state"]
+                    st.rerun()
 
 # Stage 6: Security Review
-elif not state.get("test_cases"):
+elif next_step == "review_security_recommendations":
     st.subheader("🔒 Phase 4: Security Review")
     t1, t2 = st.tabs(["🛡️ Security Recommendations", "📝 Auditor Comments"])
-    with t1: st.warning(state.get("security_recommendations", "Scanning..."))
+    with t1: st.warning(state.get("security_recommendations", "Scanning complete (No data returned)."))
     with t2: st.markdown(state.get("security_review_comments", "N/A"))
 
     st.divider()
     c1, c2 = st.columns(2)
     with c1:
         if st.button("✅ Approve Security", use_container_width=True):
-            response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_security_recommendations")
-            st.session_state.current_state = response["state"]
-            st.rerun()
+            with st.spinner("Writing extensive Test Suite (this may take a moment)..."):
+                response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_security_recommendations")
+                st.session_state.current_state = response["state"]
+                st.rerun()
     with c2:
         with st.popover("🚨 Security Feedback"):
             fback = st.text_area("Describe security vulnerabilities to fix:")
             if st.button("Send Back to Coding"):
-                response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_security_recommendations")
-                st.session_state.current_state = response["state"]
-                st.rerun()
-
+                with st.spinner("Applying security patches..."):
+                    response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_security_recommendations")
+                    st.session_state.current_state = response["state"]
+                    st.rerun()
 
 # Stage 7: Review Test Cases
-elif not state.get("qa_testing_comments"):
+elif next_step == "review_test_cases":
     st.subheader("🧪 Phase 5: Test Case Review")
     st.markdown("### Generated Test Suite")
-    st.markdown(state.get("test_cases", "Generating test cases..."))
+    
+    test_cases = state.get("test_cases", "")
+    if not test_cases:
+        st.error("⚠️ AI returned an empty test suite. Please click 'Revise' to try generating again.")
+    else:
+        st.code(test_cases, language="python")
 
     st.divider()
     c1, c2 = st.columns(2)
     with c1:
         if st.button("✅ Approve Test Cases", use_container_width=True):
-            response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_test_cases")
-            st.session_state.current_state = response["state"]
-            st.rerun()
+            with st.spinner("Executing QA Tests..."):
+                response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_test_cases")
+                st.session_state.current_state = response["state"]
+                st.rerun()
     with c2:
         with st.popover("🔄 Revise Test Cases"):
             fback = st.text_area("What is missing in the test cases?")
             if st.button("Submit Test Feedback"):
-                response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_test_cases")
-                st.session_state.current_state = response["state"]
-                st.rerun()
+                with st.spinner("Regenerating test cases..."):
+                    response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_test_cases")
+                    st.session_state.current_state = response["state"]
+                    st.rerun()
 
 # Stage 8: QA Review
-else:
+elif next_step == "review_qa_testing":
     st.subheader("🧐 Phase 6: QA Review & Bug Report")
     st.markdown("### QA Testing Results")
-    st.error(state.get("qa_testing_comments", "Testing in progress..."))
+    st.error(state.get("qa_testing_comments", "Testing data missing..."))
 
     st.divider()
     c1, c2 = st.columns(2)
     with c1:
         if st.button("🚀 Final Release Approval", use_container_width=True):
-            response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_qa_testing")
-            st.session_state.current_state = response["state"]
-            st.success("Software Verified and Ready for Deployment!")
-            st.balloons()
+            with st.spinner("Packaging artifacts..."):
+                response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_qa_testing")
+                st.session_state.current_state = response["state"]
+                st.rerun()
     with c2:
         with st.popover("🐞 Bugs Found - Reject"):
             fback = st.text_area("List bugs to be fixed in the code:")
             if st.button("Submit Bug Report"):
-                response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_qa_testing")
-                st.session_state.current_state = response["state"]
-                st.rerun()
+                with st.spinner("Sending bugs back to engineering..."):
+                    response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_qa_testing")
+                    st.session_state.current_state = response["state"]
+                    st.rerun()
+
+# Stage 9: Final Download Artifacts
+else:
+    st.balloons()
+    st.subheader("🎉 Project Complete: Artifacts Ready")
+    st.success("Your software has passed all checks and is ready for deployment!")
+    
+    st.markdown("### 📥 Download Center")
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.download_button("💻 Download Source Code", data=state.get("code_generated", ""), file_name="main_app.py", mime="text/x-python", use_container_width=True)
+    with col2:
+        design = state.get("design_documents", {})
+        d_dict = design.model_dump() if hasattr(design, "model_dump") else design
+        st.download_button("🏗️ Download Design Docs", data=f"# Functional\n{d_dict.get('functional','')}\n\n# Technical\n{d_dict.get('technical','')}", file_name="design.md", mime="text/markdown", use_container_width=True)
+    with col3:
+        st.download_button("🧪 Download Test Suite", data=state.get("test_cases", ""), file_name="tests.py", mime="text/x-python", use_container_width=True)
