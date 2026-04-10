@@ -48,5 +48,16 @@ class SDLCState(TypedDict):
     security_review_comments: str
     security_review_status: str
 
-    
+    # Phase 5: Test Cases
+    test_cases: str
+    test_case_review_status: str
+    test_case_review_feedback: str
+
+    # Phase 6: QA
+    qa_testing_comments: str
+    qa_testing_status: str
+    qa_testing_feedback: str
+
+    artifacts: dict[str, str]
+
     

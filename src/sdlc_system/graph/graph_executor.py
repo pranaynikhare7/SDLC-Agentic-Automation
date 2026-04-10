@@ -1,7 +1,7 @@
 from src.sdlc_system.state.state_file import SDLCState
 from src.sdlc_system.cache.redis_cache import flush_redis_cache, save_state_to_redis, get_state_from_redis
 import uuid
-# import src.sdlc_system.utils.constants as const
+
 
 class GraphExecutor:
     def __init__(self, graph):
@@ -93,8 +93,21 @@ class GraphExecutor:
                 saved_state['security_review_status'] = status
                 saved_state['security_review_comments'] = feedback
                 node_name = "security_review"   
-                saved_state['next_node'] = "review_security_recommendations" if status == "feedback" else "END"     # const.REVIEW_TEST_CASES
-                    
+                saved_state['next_node'] = "review_security_recommendations" if status == "feedback" else "review_test_cases"
+
+            elif review_type == "review_test_cases":
+                saved_state['test_case_review_status'] = status
+                saved_state['test_case_review_feedback'] = feedback
+                node_name = "review_test_cases" 
+                saved_state['next_node'] = "review_test_cases" if status == "feedback" else "review_qa_testing"
+                 
+            elif review_type == "review_qa_testing":
+                saved_state['qa_testing_status'] = status
+                saved_state['qa_testing_feedback'] = feedback
+                node_name = "qa_review"  
+                saved_state['next_node'] = "review_qa_testing" if status == "feedback" else "END"
+
+
             else:
                 raise ValueError(f"Unsupported review type: {review_type}")
             

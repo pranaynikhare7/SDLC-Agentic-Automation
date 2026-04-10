@@ -7,6 +7,9 @@ from src.sdlc_system.nodes.project_requirement_node import ProjectRequirementNod
 from src.sdlc_system.nodes.design_doc_node import DesingDocumentNode
 from src.sdlc_system.nodes.coding_node import CodingNode
 from src.sdlc_system.nodes.security_node import SecurityNode
+from src.sdlc_system.nodes.test_cases_node import TestNode
+from src.sdlc_system.nodes.qa_node import QANode
+from src.sdlc_system.nodes.markdown_node import MarkdownArtifactsNode
 
 
 
@@ -26,7 +29,10 @@ class GraphBuilder:
         self.project_requirement_node = ProjectRequirementNode(self.llm)
         self.design_doc_node = DesingDocumentNode(self.llm)
         self.coding_node = CodingNode(self.llm)
-        self.security_node = SecurityNode(self.llm)        
+        self.security_node = SecurityNode(self.llm)    
+        self.test_node = TestNode(self.llm)   
+        self.qa_node = QANode(self.llm) 
+        self.markdown_node = MarkdownArtifactsNode()
    
         ## Nodes
    
@@ -52,9 +58,19 @@ class GraphBuilder:
         self.graph_builder.add_node("security_review", self.security_node.security_review)
         self.graph_builder.add_node("fix_code_after_security_review", self.security_node.fix_code_after_security_review)
        
+       # Phase 5: Test Cases Generation
+        self.graph_builder.add_node("write_test_cases", self.test_node.write_test_cases)
+        self.graph_builder.add_node("review_test_cases", self.test_node.review_test_cases)
+        self.graph_builder.add_node("revise_test_cases", self.test_node.revise_test_cases)
         
+        # Phase 6: QA Testing
+        self.graph_builder.add_node("qa_testing", self.qa_node.qa_testing)
+        self.graph_builder.add_node("qa_review", self.qa_node.qa_review)        
+
+        # Phase 7: Download Artifacts
+        self.graph_builder.add_node("donwload_artifacts", self.markdown_node.generate_markdown_artifacts)
         
-        ## Edges
+        # ***************************** Edges *****************************
 
         # Phase 1: User Stories
         self.graph_builder.add_edge(START,"get_user_requirements")
@@ -105,14 +121,39 @@ class GraphBuilder:
             "security_review",
             self.security_node.security_review_router,
             {
-                # "approved": "write_test_cases",
-                "approved": END,
+                "approved": "write_test_cases",
                 "feedback": "fix_code_after_security_review"
             }
         )
         self.graph_builder.add_edge("fix_code_after_security_review","generate_code")
 
+        # Phase 5: Test Cases 
+        self.graph_builder.add_edge("write_test_cases", "review_test_cases")
+        self.graph_builder.add_conditional_edges(
+            "review_test_cases",
+            self.test_node.review_test_cases_router,
+            {
+                "approved": "qa_testing",
+                "feedback": "revise_test_cases"
+            }
+        )
+        self.graph_builder.add_edge("revise_test_cases", "write_test_cases")
 
+
+        # Phase 6: QA Testing
+        self.graph_builder.add_edge("qa_testing", "qa_review")
+        self.graph_builder.add_conditional_edges(
+            "qa_review",
+            self.qa_node.review_qa_router,
+            {
+                # "approved": "deployment",
+                "approved": "donwload_artifacts",
+                "feedback": "generate_code"
+            }
+        )
+
+        # Phase 7: Download Artifacts
+        self.graph_builder.add_edge("donwload_artifacts", END)
 
 
 
@@ -128,7 +169,9 @@ class GraphBuilder:
                 'review_user_stories',
                 'review_design_documents',
                 'code_review',
-                'security_review'
+                'security_review',
+                'review_test_cases',
+                'qa_review'
             ],checkpointer=self.memory
         )
         
