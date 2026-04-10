@@ -54,9 +54,13 @@ class DesingDocumentNode:
         """
 
         prompt = f"""
-        Create a functional design document for {project_name} in Markdown format.
+        You are a senior product analyst and system designer.
+        Create a detailed Functional Design Document (FDD) for the project: {project_name} in Markdown format.
 
-        Use proper Markdown syntax (e.g., # for titles, ## for sections, bullet points, tables, and code blocks where needed).
+        Follow these instructions:
+        - Use proper Markdown syntax (e.g., # for titles, ## for sections, bullet points, tables, and code blocks where needed).
+        - Be specific, structured, and implementation-oriented
+        - Maintain consistency across sections.
 
         Requirements:
         {requirements}
@@ -70,16 +74,16 @@ class DesingDocumentNode:
 
         # Functional Design Document: {project_name}
 
-        ## 1. Introduction and Purpose
-        ## 2. Project Scope
-        ## 3. User Roles and Permissions
-        ## 4. Functional Requirements Breakdown
-        ## 5. User Interface Design Guidelines
-        ## 6. Business Process Flows
-        ## 7. Data Entities and Relationships
-        ## 8. Validation Rules
-        ## 9. Reporting Requirements
-        ## 10. Integration Points
+        ## 1. Overview and Objectives
+        ## 2. Scope Definition
+        ## 3. Roles and Access Control
+        ## 4. Functional Requirements Analysis
+        ## 5. User Interface and Experience Guidelines
+        ## 6. Business Workflow Processes
+        ## 7. Data Model and Relationships
+        ## 8. Data Validation and Business Rules
+        ## 9. Reporting and Analytics Requirements
+        ## 10. System Integrations and Interfaces
 
         Keep the formatting clean and consistent throughout.
         """
@@ -95,11 +99,13 @@ class DesingDocumentNode:
             """
         
             prompt = f"""
-                Create a comprehensive technical design document for {project_name} in Markdown format.
+                Create a detailed Technical Design Document (TDD) for {project_name} in Markdown format.
                 
-                The document should use proper Markdown syntax with headers (# for main titles, ## for sections, etc.), 
-                bullet points, tables, code blocks, and diagrams described in text form where appropriate.
-                
+                Follow proper Markdown conventions:
+                - Use # for main titles, ## for sections, and ### for subsections
+                - Include bullet points, numbered lists, tables, and code blocks where appropriate
+                - Represent diagrams in structured textual form (e.g., flow descriptions, architecture layers)
+ 
                 Requirements:
                 {requirements}
             
@@ -112,16 +118,16 @@ class DesingDocumentNode:
                 
                 # Technical Design Document: {project_name}
 
-                ## 1. System Architecture
-                ## 2. Technology Stack and Justification
-                ## 3. Database Schema
-                ## 4. API Specifications
-                ## 5. Security Considerations
-                ## 6. Performance Considerations
-                ## 7. Scalability Approach
-                ## 8. Deployment Strategy
-                ## 9. Third-party Integrations
-                ## 10. Development, Testing, and Deployment Environments
+                ## 1. System Architecture Overview
+                ## 2. Technology Stack and Rationale
+                ## 3. Data Model and Schema Design
+                ## 4. API Design and Specifications
+                ## 5. Security Architecture and Controls
+                ## 6. Performance Optimization Strategies
+                ## 7. Scalability and Reliability Approach
+                ## 8. Deployment and Release Strategy
+                ## 9. External Integrations and Dependencies
+                ## 10. Environment Setup (Development, Testing, Production)
                 
                 For any code examples, use ```language-name to specify the programming language.
                 For database schemas, represent tables and relationships using Markdown tables.

@@ -3,264 +3,224 @@
 ## Functional Design Document
 # Functional Design Document: Calculator
 
----
+## 1. Overview and Objectives
 
-## 1. Introduction and Purpose  
-This document describes the design of a lightweight, console‑based calculator that supports a single operation: addition. The goal is to provide a clear, maintainable solution that can be executed on any system with Python 3.x without external dependencies.
+The purpose of this Functional Design Document (FDD) is to outline the requirements and specifications for a simple calculator application developed in Python. The primary objective is to address users' needs for performing basic arithmetic operations, focusing solely on addition.
 
----
+## 2. Scope Definition
 
-## 2. Project Scope  
-- **Application type**: Stand‑alone Python script (`calculator.py`).  
-- **Supported operation**: Addition of two numeric operands (int or float).  
-- **User interface**: Text console (no GUI).  
-- **Code size**: ≤ 50 non‑comment, non‑blank lines.  
-- **Platform**: Any OS with Python 3.x installed.
+This project aims to create:
+- A console-based calculator application
+- Functionality limited to addition (two or more numbers)
+- A lightweight codebase with fewer than 50 lines of code
+- A program that accepts both integer and floating-point inputs without a graphical interface
 
----
+### Exclusions
+- No user interface (GUI)
+- Any functionalities apart from addition
 
-## 3. User Roles and Permissions  
-| Role | Permissions | Notes |
-|------|-------------|-------|
-| **End‑User** | Execute script, input numbers, view result | No authentication required |
-| **Developer** | Modify source, run tests | Must keep line count ≤ 50 |
-| **Maintainer** | Update documentation | No code changes required |
+## 3. Roles and Access Control
 
----
+### Roles
+- **Product Analyst**: Responsible for gathering requirements and ensuring they meet user needs.
+- **Developer**: Implements the code based on outlined specifications.
+  
+### Access Control
+- The application is accessible via the command-line interface (CLI) and does not require user authentication.
 
-## 4. Functional Requirements Breakdown  
-| FR# | Requirement | User Story ID(s) | Priority |
-|-----|-------------|------------------|----------|
-| FR‑1 | Prompt for two numeric inputs | US‑001, US‑002 | 1 |
-| FR‑2 | Validate numeric input (int/float) | US‑002 | 1 |
-| FR‑3 | Compute sum of inputs | US‑002 | 1 |
-| FR‑4 | Display result | US‑002 | 1 |
-| FR‑5 | Handle invalid input gracefully | US‑002 | 2 |
-| FR‑6 | Keep source < 50 lines | US‑003 | 3 |
-| FR‑7 | No external libraries | US‑001 | 3 |
+## 4. Functional Requirements Analysis
 
----
+### Feature Set
+- **Addition Functionality**
+  - Accepts two numbers as input from the user.
+  - Outputs the result of the sum.
+  - Handles both integers and floating-point numbers.
 
-## 5. User Interface Design Guidelines  
-- **Console prompts**: Clear and concise.  
-- **Error messages**: Specific, e.g., *“Error: 'abc' is not a valid number.”*  
-- **Result format**: `Result: <value>`  
-- **Exit**: Press `Enter` after result to quit.
+### Use Cases
+1. User enters two integer inputs.
+2. User enters two floating-point inputs.
+3. User enters one integer and one floating-point input.
 
----
+## 5. User Interface and Experience Guidelines
 
-## 6. Business Process Flows  
+### Console Interface
+- The application will operate in a command line.
+- Prompts will be displayed to the user for input.
+- Results will be printed directly to the console.
 
-### 6.1 Main Flow  
+### Example Interaction
 ```
-[Start] → Prompt 1 → Validate 1
-   │
-   ├─ If invalid → Show error → Prompt 1
-   └─ If valid → Prompt 2 → Validate 2
-          │
-          ├─ If invalid → Show error → Prompt 2
-          └─ If valid → Compute Sum → Display Result → [End]
+Enter the first number: 5
+Enter the second number: 3.5
+The sum is: 8.5
 ```
 
-### 6.2 Error Handling Flow  
-```
-Invalid Input → Print Error → Loop to Prompt
-```
+## 6. Business Workflow Processes
 
----
+1. User starts the application.
+2. The application prompts user for the first number.
+3. The application prompts user for the second number.
+4. The application computes the sum.
+5. The result is displayed to the user.
+6. The application can be exited after showing the result.
 
-## 7. Data Entities and Relationships  
-| Entity | Attributes | Relationship |
-|--------|------------|--------------|
-| **Input** | `operand1` (float), `operand2` (float) | None (flat structure) |
-| **Result** | `sum` (float) | Derived from Input |
+## 7. Data Model and Relationships
 
-No persistent storage; all data is transient during execution.
+### Data Input
+- User inputs (float or integer):
+  - First Number
+  - Second Number
 
----
+### Output
+- Result of the addition (float or integer)
 
-## 8. Validation Rules  
-| Field | Rule | Error Message |
-|-------|------|---------------|
-| `operand1` | Must be convertible to `float` | “Error: 'X' is not a valid number.” |
-| `operand2` | Must be convertible to `float` | “Error: 'Y' is not a valid number.” |
+## 8. Data Validation and Business Rules
 
----
+- Ensure that inputs are valid numbers (either integers or floats).
+- Provide user feedback in case of invalid entries (e.g., non-numeric input).
 
-## 9. Reporting Requirements  
-- **Console output** only.  
-- No log files or external reports.
+## 9. Reporting and Analytics Requirements
 
----
+- No reporting or analytics features are required.
 
-## 10. Integration Points  
-| Integration | Description | Status |
-|-------------|-------------|--------|
-| None | The calculator is a standalone script. | N/A |
+## 10. System Integrations and Interfaces
 
----
+- No external integrations are required as this is a standalone application.
 
-## 11. Sample Implementation (≤ 50 Lines)  
+## Sample Code Implementation
 
 ```python
-#!/usr/bin/env python3
-"""
-calculator.py – Simple console calculator that adds two numbers.
-"""
-
-def get_number(prompt: str) -> float:
-    """Prompt user and return a valid float."""
+def get_number(prompt):
     while True:
         try:
             return float(input(prompt))
-        except ValueError as exc:
-            print(f"Error: '{exc.args[0]}' is not a valid number.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
 
-def main() -> None:
-    """Main entry point."""
-    num1 = get_number("Enter first number: ")
-    num2 = get_number("Enter second number: ")
+def main():
+    print("Simple Calculator for Addition")
+    num1 = get_number("Enter the first number: ")
+    num2 = get_number("Enter the second number: ")
+    
     result = num1 + num2
-    print(f"Result: {result}")
+    print(f"The sum is: {result}")
 
 if __name__ == "__main__":
     main()
 ```
 
-*Line count (excluding comments/blank lines): 23* – well below the 50‑line limit.
-
----
-
-### 12. Test Plan (Optional)  
-| Test Case | Input | Expected Output |
-|-----------|-------|-----------------|
-| Valid integers | `3`, `4` | `Result: 7` |
-| Valid floats | `2.5`, `4.1` | `Result: 6.6` |
-| Mixed types | `5`, `3.2` | `Result: 8.2` |
-| Invalid first | `a`, `3` | Error message + re‑prompt |
-| Invalid second | `4`, `b` | Error message + re‑prompt |
-
----
-
-### 13. Deployment Checklist  
-1. Ensure Python 3.x is installed.  
-2. Place `calculator.py` on the target machine.  
-3. Run with `python calculator.py`.  
-4. Verify output and error handling.
-
----
-
-## 14. Maintenance Notes  
-- Keep the script under 50 lines; avoid adding new functions unless necessary.  
-- Document any future enhancements in this document.  
-- Use descriptive variable names to aid readability.
-
----
-
-**Prepared by:**  
-*Your Name*  
-*Date:* 2026‑04‑10
+This implementation adheres to the requirements stated in the user stories, keeping the total lines of code under 50 while ensuring functionality is straightforward and user-friendly.
 
 ## Technical Design Document
 # Technical Design Document: Calculator
 
----
+## 1. System Architecture Overview
+The Calculator application is designed as a simple console-based program that performs basic addition operations. The architecture is minimalistic, emphasizing straightforward input, processing, and output without any graphical interfaces.
 
-## 1. System Architecture
+### Flow Description
+1. User inputs two numbers.
+2. Application processes the input and performs the addition operation.
+3. Output the result to the console.
 
-| Component | Responsibility | Notes |
-|-----------|----------------|-------|
-| **CLI Interface** | Reads two numeric values from the console and prints the result. | Single‑file, no GUI. |
-| **Business Logic** | Performs the addition operation. | Pure function `add(a, b)` – testable in isolation. |
-| **Input Parser** | Validates and converts user input to `float`. | Raises `ValueError` on invalid data. |
-| **Error Handler** | Catches parsing errors and displays a friendly message. | No crash on bad input. |
-| **Main Entrypoint** | Orchestrates the flow: input → add → output. | Guarded by `if __name__ == "__main__":`. |
+```plaintext
++--------------+
+| User Input   |
++--------------+
+       |
+       v
++--------------+    +------------------+
+|   Addition   |--->|     Output       |
+|  Operation   |    +------------------+
++--------------+
+```
 
-> **Flow Diagram (text form)**  
-> ```
-> +------------------+
-> |  Input:  num1    |
-> +------------------+
->          |
->          v
-> +------------------+
-> |  Input:  num2    |
-> +------------------+
->          |
->          v
-> +------------------+
-> |  add(num1, num2) |
-> +------------------+
->          |
->          v
-> +------------------+
-> |  Output: result  |
-> +------------------+
-> ```
+## 2. Technology Stack and Rationale
+- **Programming Language**: Python
+  - **Rationale**: Python is chosen for its simplicity and readability, making it ideal for smaller applications and quick development.
+- **Execution Environment**: Console/Terminal
+  - **Rationale**: As per the requirements, no GUI is needed, making console execution sufficient.
 
----
+## 3. Data Model and Schema Design
+The application does not require a complex data model or database schema. The inputs are handled directly as variables in the application.
 
-## 2. Technology Stack and Justification
+### Data Handling
+- **Input Variables**: Two numbers (supports integers and floats).
+- **Output Variable**: The sum of the two numbers.
 
-| Technology | Version | Justification |
-|------------|---------|---------------|
-| Python | 3.8+ | Widely installed, no external dependencies, supports type hints and f‑strings for clarity. |
-| Standard Library | – | Keeps the code lightweight (<50 lines) and portable. |
+## 4. API Design and Specifications
+The application does not expose APIs but operates with user inputs directly via the console. It is a standalone operation without external dependencies.
 
-> **Why no UI frameworks?**  
-> The requirement is a “simple Python application with no UI”, so a console app satisfies the user stories and keeps the code minimal.
+### Input and Output Specification
+- **Input**: 
+  - Two numbers from the user entered consecutively.
+- **Output**: 
+  - The sum displayed on the console.
 
----
+## 5. Security Architecture and Controls
+While this application does not handle sensitive data or complex transactions, input validation will be implemented to ensure that the user inputs are numeric.
 
-## 3. Database Schema
+### Input Validation
+- Inputs must be checked to ensure they can be converted to numbers (both integers and floats).
+  
+## 6. Performance Optimization Strategies
+Given the simplistic nature of the application, performance optimization is not a significant concern. The focus will be on:
+- Efficient handling of user input and error messages.
+- Fast computation of the addition operation.
 
-> **Not applicable.**  
-> The calculator is stateless; no persistence or database is required.
+## 7. Scalability and Reliability Approach
+The application does not need to handle large-scale operations. However, the following considerations will aid in maintaining reliability:
+- Simple error handling for non-numeric inputs.
+- Clear and concise user prompts and feedback.
 
----
+## 8. Deployment and Release Strategy
+The application is intended for local execution. Steps for deployment include:
+1. Ensure Python is installed on the machine.
+2. Distribute the single Python script.
+3. Instructions for users to run the script from the console.
 
-## 4. API Specifications
+### Execution Command
+```bash
+python calculator.py
+```
 
-| Interface | Method | Parameters | Returns | Notes |
-|-----------|--------|------------|---------|-------|
-| **Command‑Line** | `python calculator.py` | `--num1`, `--num2` (optional) | Prints the sum | If arguments are omitted, the script prompts interactively. |
+## 9. External Integrations and Dependencies
+This application does not integrate with any external services or libraries. It relies solely on the Python Standard Library.
 
-> **Command‑Line Usage Example**  
-> ```bash
-> $ python calculator.py --num1 12.5 --num2 7.3
-> Result: 19.8
-> ```
+## 10. Environment Setup (Development, Testing, Production)
+The development and production environments will be consistent, only requiring Python's execution environment.
 
----
+### Setup Instructions
+1. Install Python (preferably version 3.6 or higher).
+2. Create a file named `calculator.py`.
+3. Include the calculator code (detailed in the next section).
 
-## 5. Security Considerations
+### Example Code Implementation
+```python
+def add_numbers(num1, num2):
+    return num1 + num2
 
-- **Input Validation** – Only numeric values are accepted; parsing errors are caught and reported.
-- **No `eval` or `exec`** – Prevents arbitrary code execution.
-- **No External Network Calls** – The app is offline by design, eliminating network‑based threats.
-- **Minimal Dependencies** – Using only the Python standard library reduces attack surface.
+def main():
+    try:
+        # Get input from user
+        num1 = float(input("Enter the first number: "))
+        num2 = float(input("Enter the second number: "))
+        
+        # Perform addition
+        result = add_numbers(num1, num2)
+        
+        # Output the result
+        print(f"The sum of {num1} and {num2} is: {result}")
 
----
+    except ValueError:
+        print("Invalid input. Please enter numeric values.")
 
-## 6. Performance Considerations
+if __name__ == "__main__":
+    main()
+```
 
-- **Time Complexity** – O(1) for addition.
-- **Memory Footprint** – < 1 KB of code, trivial runtime memory.
-- **I/O** – Blocking console input; acceptable for a simple tool.
+In this code:
+- The `add_numbers` function handles the addition logic.
+- User input is gathered and validated to ensure it is numeric.
+- The program runs in a straightforward console environment without complex dependencies, ensuring it remains under 50 lines while following Python best practices.
 
----
-
-## 7. Scalability Approach
-
-> **Not required.**  
-> The calculator handles a single pair of numbers per run. If future requirements grow (e.g., batch processing), the architecture can be extended by adding a loop or file‑input mode without affecting the core logic.
-
----
-
-## 8. Deployment Strategy
-
-| Step | Action | Tool |
-|------|--------|------|
-| 1 | Place `calculator.py` in a directory. | File system |
-| 2 | Run via command line: `python calculator.py`. | Terminal |
-| 3 | For distribution
+This document serves as a comprehensive overview of the Technical Design Document for the Calculator application, ensuring clarity in design, implementation, and operational considerations.

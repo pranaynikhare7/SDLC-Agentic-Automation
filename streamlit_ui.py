@@ -1,5 +1,6 @@
 import streamlit as st
 from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from src.sdlc_system.graph.build_graph import GraphBuilder
 from src.sdlc_system.graph.graph_executor import GraphExecutor
 from src.sdlc_system.cache.redis_cache import get_state_from_redis
@@ -10,7 +11,9 @@ st.set_page_config(page_title="AI SDLC Designer", layout="wide")
 # --- Initialize Backend ---
 @st.cache_resource
 def get_executor():
-    llm = ChatGroq(model='openai/gpt-oss-20b')
+    # llm = ChatGroq(model='openai/gpt-oss-20b')
+
+    llm = ChatOpenAI(model = 'gpt-4o-mini')
     builder = GraphBuilder(llm)
     graph = builder.setup_graph()
     return GraphExecutor(graph)
@@ -25,7 +28,7 @@ def sync_state(task_id):
         st.session_state.task_id = task_id
 
 # --- App Logic ---
-st.title("🛡️ Redis-Backed SDLC Agent")
+st.title("🛡️ SDLC Automation System")
 
 # Sidebar for Session Recovery & Status
 with st.sidebar:

@@ -9,6 +9,3 @@ streamlit
 langchain-google-genai
 redis
 upstash_redis
-# fastapi
-# uvicorn
-# loguru

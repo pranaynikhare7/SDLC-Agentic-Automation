@@ -1,109 +1,93 @@
 # Test Cases for Calculator
 
 
+Here's a comprehensive set of test cases for your `calculator.py` implementation using Python's `unittest` framework. These test cases cover various edge cases, functional correctness, and both positive and negative scenarios. 
+
+### Test Cases for `calculator.py`
+
 ```python
-# tests/test_calculator_and_main.py
-"""
-Unit tests for the tiny calculator and CLI entry point.
-All tests are written using the standard unittest framework.
-"""
-
-import sys
-import builtins
-import io
 import unittest
-from unittest import mock
-from contextlib import redirect_stdout
+from io import StringIO
+import sys
 
-# Import the modules under test
-import calculator
-import main
+# Note: Import the functions you want to test from calculator.py here
+# from calculator import add_numbers, get_number
 
+# Mocking the input function for the get_number method
+def mocked_input(mocked_responses):
+    responses = iter(mocked_responses)
+    def input_side_effect(prompt):
+        return next(responses)
+    return input_side_effect
 
-class TestAddFunction(unittest.TestCase):
-    """Positive & negative tests for calculator.add."""
+class TestCalculator(unittest.TestCase):
+    
+    def test_add_numbers_positive(self):
+        self.assertEqual(add_numbers(5, 3), 8)
+    
+    def test_add_numbers_negative(self):
+        self.assertEqual(add_numbers(-2, -3), -5)
 
-    def test_add_positive_numbers(self):
-        self.assertEqual(calculator.add(1.2, 3.4), 4.6)
+    def test_add_numbers_mixed(self):
+        self.assertEqual(add_numbers(-5, 10), 5)
+    
+    def test_add_numbers_zero(self):
+        self.assertEqual(add_numbers(0, 0), 0)
+        
+    def test_add_numbers_large_numbers(self):
+        self.assertEqual(add_numbers(1e10, 1e10), 2e10)
 
-    def test_add_negative_numbers(self):
-        self.assertEqual(calculator.add(-1.5, -2.5), -4.0)
+    def test_add_numbers_float(self):
+        self.assertAlmostEqual(add_numbers(5.5, 4.5), 10.0)
 
-    def test_add_zero(self):
-        self.assertEqual(calculator.add(0.0, 0.0), 0.0)
+    def test_get_number_valid_input(self):
+        # Test valid input case
+        user_input = ['10']
+        sys.stdin = StringIO('\n'.join(user_input))
+        self.assertEqual(get_number("Enter a number: "), 10.0)
 
-    def test_add_negative_zero(self):
-        # -0.0 + 0.0 should be 0.0
-        self.assertEqual(calculator.add(-0.0, 0.0), 0.0)
+    def test_get_number_invalid_float(self):
+        # Test invalid input case
+        user_input = ['abc', '10']
+        sys.stdin = StringIO('\n'.join(user_input))
+        self.assertEqual(get_number("Enter a number: "), 10.0)
 
-    def test_add_large_numbers(self):
-        # 1e308 + 1e308 overflows to inf
-        result = calculator.add(1e308, 1e308)
-        self.assertTrue(result == float("inf"))
+    def test_get_number_invalid_int(self):
+        # Test another invalid input case
+        user_input = ['-1.5.5', '3']  # Invalid decimal point, then valid number
+        sys.stdin = StringIO('\n'.join(user_input))
+        self.assertEqual(get_number("Enter a number: "), 3.0)
 
-    def test_add_precision(self):
-        # Floating point arithmetic is not exact
-        self.assertAlmostEqual(calculator.add(0.1, 0.2), 0.3, places=7)
+    def test_get_number_nan(self):
+        user_input = ['nan', '5']
+        sys.stdin = StringIO('\n'.join(user_input))
+        self.assertEqual(get_number("Enter a number: "), 5.0)
 
+    def test_get_number_infinity(self):
+        user_input = ['inf', '7']
+        sys.stdin = StringIO('\n'.join(user_input))
+        self.assertEqual(get_number("Enter a number: "), 7.0)
 
-class TestGetNumberFunction(unittest.TestCase):
-    """Tests for main.get_number, covering normal, invalid, and edge cases."""
+    def test_get_number_empty_input(self):
+        user_input = ['', '5']
+        sys.stdin = StringIO('\n'.join(user_input))
+        self.assertEqual(get_number("Enter a number: "), 5.0)
 
-    @mock.patch.object(builtins, "input", return_value="5.5")
-    def test_get_number_valid_input(self, mock_input):
-        self.assertEqual(main.get_number("prompt: "), 5.5)
-        mock_input.assert_called_once_with("prompt: ")
+if __name__ == '__main__':
+    unittest.main()
+```
 
-    @mock.patch.object(builtins, "input", side_effect=["abc", "3.3"])
-    def test_get_number_invalid_then_valid(self, mock_input):
-        # First call raises ValueError, second call returns valid float
-        with io.StringIO() as buf, redirect_stdout(buf):
-            result = main.get_number("prompt: ")
-            output = buf.getvalue()
-        self.assertEqual(result, 3.3)
-        self.assertIn("Error:", output)  # Error message printed
-        self.assertEqual(mock_input.call_count, 2)
+### Key Components Explained:
 
-    @mock.patch.object(builtins, "input", side_effect=["", "2"])
-    def test_get_number_empty_then_valid(self, mock_input):
-        with io.StringIO() as buf, redirect_stdout(buf):
-            result = main.get_number("prompt: ")
-            output = buf.getvalue()
-        self.assertEqual(result, 2.0)
-        self.assertIn("Error:", output)
+1. **Test Cases for `add_numbers`**: Tests different cases, including both positive and negative integers, mixed signs, and edge cases such as zero and large numbers.
 
-    @mock.patch.object(builtins, "input", side_effect=EOFError)
-    def test_get_number_eof_propagates(self, mock_input):
-        # Original implementation does not catch EOFError; it should propagate
-        with self.assertRaises(EOFError):
-            main.get_number("prompt: ")
+2. **Test Cases for `get_number`**: 
+   - Valid input tests ensure that numeric input is accepted and converted correctly.
+   - Invalid inputs test various failure cases, such as non-numerical strings, multiple decimal points, empty input, NaN, and infinity.
 
-    @mock.patch.object(builtins, "input", side_effect=KeyboardInterrupt)
-    def test_get_number_keyboard_interrupt_propagates(self, mock_input):
-        with self.assertRaises(KeyboardInterrupt):
-            main.get_number("prompt: ")
+3. **Input Mocking**: The `StringIO` library is used to simulate user input for testing purposes, allowing us to control the input function’s responses.
 
-
-class TestMainFunction(unittest.TestCase):
-    """Tests for main.main, covering CLI arguments, interactive mode, and error handling."""
-
-    def run_main_with_args(self, argv, inputs=None):
-        """
-        Helper to run main.main with a specific sys.argv list.
-        Optionally patch builtins.input with a list of responses.
-        Returns captured stdout and any exception raised.
-        """
-        with mock.patch.object(sys, "argv", argv):
-            if inputs is not None:
-                input_patch = mock.patch.object(builtins, "input", side_effect=inputs)
-                input_patch.start()
-            else:
-                input_patch = None
-            f = io.StringIO()
-            with redirect_stdout(f):
-                try:
-                    main.main()
-                except Exception as e:
-                    exc = e
-                else:
-                    exc = None
+### Additional Notes:
+- Remember to address the feedback received in the review comments, particularly regarding docstrings and potential input validation improvements. 
+- Ensure all your imports from `calculator.py` or any necessary modules are correctly referenced when integrating tests.
+- Review the structure and adaptability of these tests as your application evolves and potentially includes more functionality beyond addition.

@@ -1,40 +1,29 @@
 # Generated Code for Calculator
 
 
---- File: calculator.py ---
 ```python
-def add(a: float, b: float) -> float:
-    """Return the sum of two numbers."""
-    return a + b
-```
+# calculator.py
 
---- File: main.py ---
-```python
-#!/usr/bin/env python3
-import sys
-from calculator import add
+def add_numbers(num1, num2):
+    return num1 + num2
 
-def get_number(prompt: str) -> float:
+def get_number(prompt):
     while True:
         try:
             return float(input(prompt))
-        except ValueError as e:
-            print(f"Error: '{e.args[0]}' is not a valid number.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
 
-def main() -> None:
-    if len(sys.argv) == 3:
-        try:
-            num1 = float(sys.argv[1])
-            num2 = float(sys.argv[2])
-        except ValueError as e:
-            print(f"Error: '{e.args[0]}' is not a valid number.")
-            return
-    else:
-        num1 = get_number("Enter first number: ")
-        num2 = get_number("Enter second number: ")
-    result = add(num1, num2)
-    print(f"Result: {result}")
+def main():
+    print("Simple Calculator for Addition")
+    num1 = get_number("Enter the first number: ")
+    num2 = get_number("Enter the second number: ")
+    
+    result = add_numbers(num1, num2)
+    print(f"The sum is: {result}")
 
 if __name__ == "__main__":
     main()
-```
+``` 
+
+This single file encapsulates all the required functionality for the calculator application adhering to the constraints specified.
