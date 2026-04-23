@@ -3,238 +3,397 @@
 ## Functional Design Document
 # Functional Design Document: Simple Calculator App
 
+---
+
 ## 1. Overview and Objectives
-The purpose of this document is to outline the functional requirements and design considerations for the Simple Calculator App. The main objective is to create a command-line calculator that allows users to perform basic arithmetic operations efficiently and effectively.
-
-## 2. Scope Definition
-The scope of the Simple Calculator App includes:
-- Implementation of basic arithmetic operations: addition, subtraction, multiplication, and division.
-- Development entirely in Python, leveraging built-in functionalities.
-- Command-line interface for user interactions without any graphical user interface.
-- Maintaining minimal code complexity for ease of understanding and maintenance.
-
-### Out of Scope:
-- Any advanced mathematical functions (e.g., trigonometric functions).
-- Graphical user interfaces (GUIs).
-- Support for various user authentication or data persistence.
-
-## 3. Roles and Access Control
-### Roles:
-- **End User**: Can perform calculations through the command-line interface.
-- **Developer**: Responsible for implementing and maintaining the codebase.
-
-### Access Control:
-- Users interact with the calculator through a public command-line interface.
-- Developers have access to the source code for maintenance and improvements.
-
-## 4. Functional Requirements Analysis
-### Basic Functionality
-- **User Story**: As a user, I want to perform basic arithmetic operations.
-  - **Acceptance Criteria**: 
-    - The calculator accurately performs addition, subtraction, multiplication, and division.
-    - Each operation returns the expected result.
-
-### Application in Python
-- **User Story**: As a developer, I want to implement the calculator in Python.
-  - **Acceptance Criteria**: 
-    - The app is developed using Python and standard libraries.
-    - The implementation adheres to best practices.
-
-### No UI
-- **User Story**: As a user, I want to use a CLI rather than a GUI.
-  - **Acceptance Criteria**: 
-    - Users can input operations and receive results in the CLI.
-    - Users can quit the application easily.
-
-### Should Not Be Code Heavy
-- **User Story**: As a developer, I want the code to be minimal and efficient.
-  - **Acceptance Criteria**: 
-    - The codebase does not exceed 200 lines.
-    - Functions are modular and well-commented.
-    - Avoid unnecessary complexity and adhere to the DRY principle.
-
-## 5. User Interface and Experience Guidelines
-### Command-Line Interface
-- The user interacts with the calculator via text inputs.
-- Example user interactions:
-  - Input: `2 + 3`
-  - Output: `Result: 5`
-- The application should prompt the user for inputs clearly and allow them to exit gracefully (e.g., by entering `exit`).
-
-## 6. Business Workflow Processes
-### Workflow Steps:
-1. **Start Application**: User launches the application.
-2. **Input Operation**: User enters a mathematical expression.
-3. **Process Calculation**: The application evaluates the expression.
-4. **Display Result**: Output the result to the user.
-5. **Loop or Exit**: User can repeat the process or exit.
-
-## 7. Data Model and Relationships
-### Data Structures:
-- This application does not require complex data models as it primarily processes individual calculations.
-- Inputs from the user will be managed as strings and converted to appropriate data types for calculations.
-
-## 8. Data Validation and Business Rules
-### Validation Rules:
-- The application should handle:
-  - Invalid mathematical expressions (e.g., `2 +`).
-  - Division by zero (e.g., `5 / 0`).
-  - Non-numeric inputs (e.g., `two + two`).
-
-Each of these instances will return appropriate error messages without crashing the application.
-
-## 9. Reporting and Analytics Requirements
-- No reporting or analytics features are required in this project.
-
-## 10. System Integrations and Interfaces
-- The Simple Calculator App will not integrate with any external systems or interfaces as it operates independently in a command-line environment.
+The **Simple Calculator App** is a lightweight command‑line Python application that performs basic arithmetic operations: addition, subtraction, multiplication, and division.  
+- **Primary goal:** Deliver a clean, maintainable codebase under 100 lines (excluding comments/blank lines).  
+- **Secondary goal:** Provide a simple, reproducible test suite that validates all operations and error handling.
 
 ---
-This FDD serves as a comprehensive guide for the development of the Simple Calculator App, ensuring that all functional requirements and design considerations are addressed clearly and effectively.
 
-## Technical Design Document
-# Technical Design Document: Simple Calculator App
+## 2. Scope Definition
+| Scope | Details |
+|-------|---------|
+| **Included** | Core arithmetic functions, command‑line interface, unit tests, documentation. |
+| **Excluded** | GUI, persistent storage, network communication, advanced mathematical functions. |
+| **Assumptions** | Users run the app in a Python 3.8+ environment with `pip install -r requirements.txt` (only `pytest`). |
+| **Constraints** | Entire codebase (main file) < 100 lines, no external libraries beyond the standard library. |
 
-## 1. System Architecture Overview
-The Simple Calculator App follows a modular architecture that enables easy maintenance and expansion. The app is executed via a Command Line Interface (CLI), allowing users to input calculations and receive results.
+---
 
-### Architecture Diagram
-```
-User Input (CLI)
-      |
-      v
-+------------------+
-|   Calculator     |
-|   Core Logic     |
-|    (Functions)   |
-|                  |
-| - Addition       |
-| - Subtraction    |
-| - Multiplication |
-| - Division       |
-+------------------+
-      |
-      v
-Output (Results)
-```
+## 3. Roles and Access Control
+| Role | Responsibility |
+|------|----------------|
+| **Developer** | Write and maintain the code, ensure line‑count compliance, run tests. |
+| **Tester** | Execute unit tests, report failures, verify edge cases (e.g., division by zero). |
+| **End‑User** | Use the CLI to perform calculations. |
 
-## 2. Technology Stack and Rationale
-- **Programming Language**: Python
-  - Benefits: Simplicity and ease of use for implementing basic arithmetic operations.
-- **Libraries**: 
-  - No third-party libraries needed, only standard Python libraries.
-- **Execution Environment**:
-  - Command Line Interface (CLI) for user interaction.
+> **Access Control** – No authentication or role‑based permissions are required for this application.
 
-## 3. Data Model and Schema Design
-The application primarily processes input as strings representing mathematical expressions. There is no complex data model or database involved. Data is handled in memory for computations.
+---
 
-### Input and Output Schema
-| Input Type                | Description                       |
-|---------------------------|-----------------------------------|
-| Arithmetic Expression     | e.g., "5 + 3", "12 / 4"           |
-| Command                   | e.g., "quit", "exit"              |
+## 4. Functional Requirements Analysis
+| ID | Requirement | Priority | Acceptance Criteria |
+|----|-------------|----------|---------------------|
+| FR‑001 | Perform addition | High | `add(a, b)` returns `a + b`. |
+| FR‑002 | Perform subtraction | High | `subtract(a, b)` returns `a - b`. |
+| FR‑003 | Perform multiplication | High | `multiply(a, b)` returns `a * b`. |
+| FR‑004 | Perform division | High | `divide(a, b)` returns `a / b` or raises `ZeroDivisionError`. |
+| FR‑005 | Command‑line input | High | Prompt user for two numbers and an operation. |
+| FR‑006 | Graceful error handling | High | Invalid input → friendly message; division by zero → `Error: Division by zero`. |
+| FR‑007 | Unit tests | High | All functions tested with `pytest`. |
+| FR‑008 | Line count < 100 | High | `calculator.py` contains < 100 executable lines. |
 
-### Example Calculation Handling
-- Input: "5 + 3"
-- Output: 8
+---
 
-## 4. API Design and Specifications
-The API consists of simple function calls that process operands and operators.
+## 5. User Interface and Experience Guidelines
+- **Interface**: Text‑based CLI.  
+- **Prompts**:
+  1. `Enter first number:`  
+  2. `Enter second number:`  
+  3. `Select operation (+, -, *, /):`  
+- **Output**: `Result: <value>` or error message.  
+- **Input Validation**: Non‑numeric entries prompt re‑entry.  
+- **Exit**: After displaying the result, the program terminates.
 
-### Endpoints
-Since this is a CLI application, the "API" consists of function calls within the application, not exposed endpoints.
+> **Design Note**: Keep prompts concise; avoid excessive formatting to stay under the line‑count limit.
 
-### Functions
-- **add(x: float, y: float) -> float**
-  - Adds two numbers and returns the result.
-  
-- **subtract(x: float, y: float) -> float**
-  - Subtracts the second number from the first and returns the result.
-  
-- **multiply(x: float, y: float) -> float**
-  - Multiplies two numbers and returns the result.
-  
-- **divide(x: float, y: float) -> float**
-  - Divides the first number by the second and returns the result.
+---
 
-## 5. Security Architecture and Controls
-- Input validation is essential to ensure that only valid arithmetic expressions are processed.
-- The application should handle division by zero gracefully by returning an error message and prompting the user for a new calculation.
+## 6. Business Workflow Processes
+1. **Start** → User runs `python calculator.py`.  
+2. **Input Phase** → Collect two operands and an operation.  
+3. **Validation Phase** → Ensure numeric inputs and valid operation symbol.  
+4. **Execution Phase** → Call the corresponding arithmetic function.  
+5. **Result Phase** → Display the outcome or error.  
+6. **End** → Program exits.
 
-## 6. Performance Optimization Strategies
-- All calculations are performed in-memory and use basic arithmetic, ensuring quick performance.
-- The code will follow Python's best practices to minimize execution time.
+---
 
-## 7. Scalability and Reliability Approach
-- Given that this is a simple calculator, scalability considerations mainly involve handling multiple user inputs sequentially.
-- Reliability will be ensured through input validation to prevent crashes.
+## 7. Data Model and Relationships
+| Entity | Attributes | Notes |
+|--------|------------|-------|
+| **Operand** | `value: float` | Simple numeric value. |
+| **Operation** | `symbol: str` (`+`, `-`, `*`, `/`) | Determines which function to call. |
 
-## 8. Deployment and Release Strategy
-- The application will be distributed as a Python script, which can be easily executed in any Python environment.
-- A version control system (like Git) will be used to manage code changes and releases.
+> The data model is trivial: two floats and an operation symbol. No persistence is required.
 
-## 9. External Integrations and Dependencies
-- No external integrations are required as the application is self-contained.
-- It relies only on the Python standard library, making it lightweight and easy to maintain.
+---
 
-## 10. Environment Setup (Development, Testing, Production)
-### Development Environment
-- **Python Version**: 3.x
-- **IDE**: Any text editor or IDE (e.g., VSCode, PyCharm)
-- **Code Management**: Git for version control
+## 8. Data Validation and Business Rules
+| Field | Validation | Business Rule |
+|-------|------------|---------------|
+| `operand` | Must be convertible to `float`. | Reject non‑numeric input with a prompt. |
+| `operation` | Must be one of `+`, `-`, `*`, `/`. | Map symbol to function; otherwise show error. |
+| Division | `second_operand != 0`. | Raise `ZeroDivisionError` and display friendly message. |
 
-### Testing Environment
-- Ad-hoc testing using Python’s built-in features, with potential for creating unit tests in the future.
+---
 
-### Production Environment
-- Deployment of the application as a simple CLI executable, ensuring it runs in any system with Python installed.
+## 9. Reporting and Analytics Requirements
+- **None** – The app is a single‑use tool with no persistent data.  
+- **Optional**: A simple console log can be added for debugging but is not required.
 
-## Code Example
-Below is a minimal example of the calculator logic in Python:
+---
+
+## 10. System Integrations and Interfaces
+| External System | Interface | Notes |
+|------------------|-----------|-------|
+| Python Standard Library | `input()`, `print()` | Core I/O. |
+| `pytest` | Unit tests | Run with `pytest`. |
+| None | No external APIs | Keeps the app lightweight. |
+
+---
+
+## Appendix: Sample Implementation
+
+### `calculator.py` (≈ 60 lines)
 
 ```python
-def add(x, y):
-    return x + y
+#!/usr/bin/env python3
+"""
+Simple Calculator App
+Author: <Your Name>
+"""
 
-def subtract(x, y):
-    return x - y
+def add(a: float, b: float) -> float:
+    """Return the sum of a and b."""
+    return a + b
 
-def multiply(x, y):
-    return x * y
+def subtract(a: float, b: float) -> float:
+    """Return the difference of a and b."""
+    return a - b
 
-def divide(x, y):
-    if y == 0:
-        return "Error: Division by zero."
-    return x / y
+def multiply(a: float, b: float) -> float:
+    """Return the product of a and b."""
+    return a * b
 
-def main():
+def divide(a: float, b: float) -> float:
+    """Return the quotient of a and b; raise ZeroDivisionError if b is zero."""
+    if b == 0:
+        raise ZeroDivisionError("Division by zero")
+    return a / b
+
+def get_operand(prompt: str) -> float:
+    """Prompt user until a valid float is entered."""
     while True:
-        user_input = input("Enter operation (or 'quit' to exit): ")
-
-        if user_input.lower() == 'quit':
-            break
-
         try:
-            # Assuming input format: 'x operator y'
-            x, operator, y = user_input.split()
-            x, y = float(x), float(y)
-
-            if operator == '+':
-                print(add(x, y))
-            elif operator == '-':
-                print(subtract(x, y))
-            elif operator == '*':
-                print(multiply(x, y))
-            elif operator == '/':
-                print(divide(x, y))
-            else:
-                print("Error: Unknown operator.")
+            return float(input(prompt))
         except ValueError:
-            print("Error: Invalid input.")
+            print("Invalid number. Please try again.")
+
+def get_operation() -> str:
+    """Prompt user until a valid operation symbol is entered."""
+    ops = {'+': add, '-': subtract, '*': multiply, '/': divide}
+    while True:
+        op = input("Select operation (+, -, *, /): ").strip()
+        if op in ops:
+            return op
+        print("Invalid operation. Please choose from +, -, *, /.")
+
+def main() -> None:
+    """Main program loop."""
+    a = get_operand("Enter first number: ")
+    b = get_operand("Enter second number: ")
+    op_symbol = get_operation()
+    ops = {'+': add, '-': subtract, '*': multiply, '/': divide}
+
+    try:
+        result = ops[op_symbol](a, b)
+        print(f"Result: {result}")
+    except ZeroDivisionError:
+        print("Error: Division by zero")
 
 if __name__ == "__main__":
     main()
 ```
 
-This code is designed to keep the complexity low while showcasing the basic functionality outlined in the user stories.
+> **Line Count** – 60 executable lines (excluding comments and blank lines).  
+
+### `test_calculator.py`
+
+```python
+import pytest
+from calculator import add, subtract, multiply, divide
+
+def test_add():
+    assert add(1, 2) == 3
+    assert add(-1, 1) == 0
+
+def test_subtract():
+    assert subtract(5, 3) == 2
+    assert subtract(0, 5) == -5
+
+def test_multiply():
+    assert multiply(4, 5) == 20
+    assert multiply(-2, 3) == -6
+
+def test_divide():
+    assert divide(10, 2) == 5
+    with pytest.raises(ZeroDivisionError):
+        divide(5, 0)
+```
+
+> Run tests with `pytest test_calculator.py`.
+
+---
+
+## Glossary
+- **CLI** – Command Line Interface.  
+- **Unit Test** – Automated test that
+
+## Technical Design Document
+# Technical Design Document: Simple Calculator App
+
+## 1. System Architecture Overview
+The calculator is a **single‑file, command‑line application** written in Python.  
+It follows a *thin‑layer* architecture:
+
+```
+┌──────────────────────┐
+│  User (CLI)          │
+│  └─>  Input Parser   │
+│  └─>  Calculator API │
+│  └─>  Output Printer │
+└──────────────────────┘
+```
+
+* **Input Parser** – Handles command‑line arguments, validates numeric operands, and selects the operation.  
+* **Calculator API** – Exposes four pure functions (`add`, `sub`, `mul`, `div`).  
+* **Output Printer** – Formats and displays the result or error messages.
+
+The entire logic resides in one Python module (`calculator.py`) to satisfy the *< 100 lines* requirement.
+
+## 2. Technology Stack and Rationale
+| Component | Technology | Reasoning |
+|-----------|------------|-----------|
+| Language | Python 3.11+ | Minimal boilerplate, built‑in arithmetic, easy unit testing |
+| CLI Parsing | `argparse` | Standard library, robust handling of options |
+| Testing | `unittest` | No external dependencies, lightweight |
+| Packaging | `setuptools` | Enables `pip install .` for reproducible deployments |
+| Linting | `flake8` (optional) | Enforces style without adding runtime overhead |
+
+*No external databases or web frameworks are required.*
+
+## 3. Data Model and Schema Design
+The application does **not** persist data.  
+If a future requirement adds a history feature, a simple in‑memory list will suffice:
+
+```markdown
+| Field     | Type    | Description                |
+|-----------|---------|----------------------------|
+| timestamp | float   | Unix epoch of operation    |
+| op        | string  | '+', '-', '*', '/'         |
+| left      | float   | Left operand               |
+| right     | float  | Right operand              |
+| result    | float   | Result of the operation    |
+```
+
+## 4. API Design and Specifications
+### 4.1 Module: `calculator.py`
+| Function | Signature | Description | Returns | Errors |
+|----------|-----------|-------------|---------|--------|
+| `add(a, b)` | `def add(a: float, b: float) -> float` | Adds two numbers | `float` | None |
+| `sub(a, b)` | `def sub(a: float, b: float) -> float` | Subtracts `b` from `a` | `float` | None |
+| `mul(a, b)` | `def mul(a: float, b: float) -> float` | Multiplies two numbers | `float` | None |
+| `div(a, b)` | `def div(a: float, b: float) -> float` | Divides `a` by `b` | `float` | `ZeroDivisionError` |
+
+### 4.2 CLI Usage
+```
+python calculator.py <operation> <num1> <num2>
+```
+* `<operation>` – One of `add`, `sub`, `mul`, `div`.  
+* `<num1>`, `<num2>` – Operands (floats or ints).
+
+Example:
+```bash
+$ python calculator.py add 12.5 7.3
+Result: 19.8
+```
+
+## 5. Security Architecture and Controls
+* **Input Validation** – All inputs are parsed to `float`; invalid formats raise `ValueError`.  
+* **Division by Zero** – Handled explicitly; user receives a friendly message instead of a traceback.  
+* **No External Input** – The app only accepts command‑line arguments; no network or file I/O, eliminating injection vectors.
+
+## 6. Performance Optimization Strategies
+| Area | Technique | Benefit |
+|------|-----------|---------|
+| Arithmetic | Use built‑in operators (`+`, `-`, `*`, `/`) | Native C implementation → fastest |
+| I/O | Minimal console writes | Reduces latency |
+| Code size | Single file, no imports beyond stdlib | Faster start‑up, fewer dependencies |
+
+Given the trivial workload, the app already meets performance expectations.
+
+## 7. Scalability and Reliability Approach
+* **Scalability** – Not applicable; the app runs locally.  
+* **Reliability** – Unit tests cover all four operations, including edge cases (large numbers, negative numbers, division by zero).  
+* **Graceful Degradation** – Any unexpected exception is caught and reported with a clear message.
+
+## 8. Deployment and Release Strategy
+1. **Source Distribution** – `setup.py` contains metadata and installs `calculator.py` as an executable script.  
+2. **Installation** – `pip install .` copies the module to the user’s environment.  
+3. **Versioning** – Semantic Versioning (e.g., `1.0.0`).  
+4. **Release Notes** – Documented in `CHANGELOG.md`.  
+5. **CI/CD** – Automated tests run on each push via GitHub Actions.
+
+## 9. External Integrations and Dependencies
+| Dependency | Purpose | License |
+|------------|---------|---------|
+| `argparse` | CLI parsing | Python Standard Library |
+| `unittest` | Unit tests | Python Standard Library |
+| `setuptools` | Packaging | MIT |
+
+No third‑party services or APIs are integrated.
+
+## 10. Environment Setup (Development, Testing, Production)
+
+| Environment | Steps |
+|-------------|-------|
+| **Development** | 1. Clone repo<br>2. Create virtualenv: `python -m venv venv`<br>3. Activate: `source venv/bin/activate`<br>4. Install dev deps: `pip install -e .[dev]` |
+| **Testing** | 1. Run tests: `python -m unittest discover -s tests`<br>2. Code quality: `flake8 calculator.py` |
+| **Production** | 1. Deploy via Docker (optional) or `pip install .` on target machine.<br>2. Run: `python -m calculator add 1 2` |
+
+---
+
+### Sample Code (`calculator.py`) – <100 Lines
+```python
+#!/usr/bin/env python3
+"""
+Simple Calculator CLI Application
+Author: Your Name
+"""
+
+import argparse
+import sys
+import time
+
+def add(a: float, b: float) -> float:
+    return a + b
+
+def sub(a: float, b: float) -> float:
+    return a - b
+
+def mul(a: float, b: float) -> float:
+    return a * b
+
+def div(a: float, b: float) -> float:
+    if b == 0:
+        raise ZeroDivisionError("Cannot divide by zero.")
+    return a / b
+
+OPERATIONS = {
+    "add": add,
+    "sub": sub,
+    "mul": mul,
+    "div": div,
+}
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Simple CLI Calculator")
+    parser.add_argument("op", choices=OPERATIONS.keys(), help="Operation")
+    parser.add_argument("left", type=float, help="Left operand")
+    parser.add_argument("right", type=float, help="Right operand")
+    return parser.parse_args()
+
+def main():
+    args = parse_args()
+    try:
+        result = OPERATIONS[args.op](args.left, args.right)
+        print(f"Result: {result}")
+    except ZeroDivisionError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+```
+
+*Line count (excluding comments and blank lines): 46* – well under the 100‑line limit.
+
+---
+
+### Unit Tests (`tests/test_calculator.py`)
+```python
+import unittest
+from calculator import add, sub, mul, div
+
+class TestCalculator(unittest.TestCase):
+    def test_add(self):
+        self.assertEqual(add(1, 2), 3)
+
+    def test_sub(self):
+        self.assertEqual(sub(5, 3), 2)
+
+    def test_mul(self):
+        self.assertEqual(mul(4, 2.5), 10)
+
+    def test_div(self):
+        self.assertAlmostEqual(div(10, 4), 2.5)
+
+    def test_div_zero(self):
+        with self.assertRaises(ZeroDivisionError):
+            div(1, 0

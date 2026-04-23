@@ -19,9 +19,15 @@ class ProjectRequirementNode:
 
     def generate_user_stories(self, state: SDLCState):
 
-        project_name = state["project_name"]
-        requirements = state["requirements"]
+        # 1. Use .get() to prevent hard KeyErrors
+        project_name = state.get("project_name", "Unknown Project")
+        requirements = state.get("requirements", [])
         feedback = state.get("user_stories_feedback", "")
+
+        # 2. Safety check: If requirements are empty, return early or handle it
+        if not requirements:
+            print("[Warning] No requirements found in state!")
+            return {"user_stories": []}
 
         # Clean, descriptive prompt with NO formatting instructions
         prompt = f"""

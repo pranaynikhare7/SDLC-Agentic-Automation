@@ -1,74 +1,62 @@
 # Test Cases for Simple Calculator App
 
 
-Based on the provided code and the review comments, here are comprehensive test cases written using the `unittest` framework in Python. These test cases aim to cover all functionalities of the calculator, handle edge cases, and validate correct behavior when inputs are valid and invalid.
-
 ```python
+# test_calculator_unittest.py
+"""
+Unit‑tests for the `calculator` module using the standard unittest framework.
+All public functions are exercised, including edge‑cases, error handling and
+the interactive helper functions that use `input()`/`print()`.
+"""
+
+import math
+import sys
+import types
 import unittest
-from calculator import add, subtract, multiply, divide, validate_input
+from unittest.mock import patch, MagicMock
 
-class TestCalculator(unittest.TestCase):
-    
-    # Test cases for add function
+import calculator
+from calculator import add, subtract, multiply, divide, get_operand, get_operation, main, OPS, VALID_OPS
+
+
+class TestArithmeticFunctions(unittest.TestCase):
+    """Pure functions – add, subtract, multiply, divide."""
+
     def test_add(self):
-        self.assertEqual(add(2, 3), 5)
+        # integer + integer
+        self.assertEqual(add(1, 2), 3)
+        # negative + positive
         self.assertEqual(add(-1, 1), 0)
-        self.assertEqual(add(-1, -1), -2)
-        self.assertEqual(add(0, 0), 0)
-        self.assertEqual(add(0.1, 0.2), 0.3)
+        # float + float
+        self.assertAlmostEqual(add(0.1, 0.2), 0.30000000000000004)
 
-    # Test cases for subtract function
     def test_subtract(self):
         self.assertEqual(subtract(5, 3), 2)
-        self.assertEqual(subtract(10, 15), -5)
-        self.assertEqual(subtract(-1, -1), 0)
-        self.assertEqual(subtract(0, 1), -1)
-        self.assertEqual(subtract(-1, 0), -1)
+        self.assertEqual(subtract(0, 5), -5)
+        self.assertAlmostEqual(subtract(0.3, 0.1), 0.19999999999999996)
 
-    # Test cases for multiply function
     def test_multiply(self):
-        self.assertEqual(multiply(2, 3), 6)
-        self.assertEqual(multiply(-1, 5), -5)
-        self.assertEqual(multiply(0, 100), 0)
-        self.assertEqual(multiply(4.5, 2), 9.0)
-        self.assertEqual(multiply(0.5, 0.5), 0.25)
+        self.assertEqual(multiply(4, 5), 20)
+        self.assertEqual(multiply(-2, 3), -6)
+        # large numbers → overflow to inf
+        self.assertTrue(math.isinf(multiply(1e308, 1e308)))
 
-    # Test cases for divide function
     def test_divide(self):
         self.assertEqual(divide(10, 2), 5)
-        self.assertEqual(divide(5, 0), "Error: Division by zero.")
+        self.assertAlmostEqual(divide(7, 3), 7 / 3)
+
+        # Division by zero
+        with self.assertRaises(ZeroDivisionError):
+            divide(5, 0)
+        with self.assertRaises(ZeroDivisionError):
+            divide(5, -0.0)
+
+        # Very small denominator → huge result (may become inf)
+        self.assertTrue(math.isinf(divide(1e308, 1e-308)))
+
+    def test_divide_with_float_denominator(self):
+        self.assertAlmostEqual(divide(1.5, 0.5), 3.0)
+
+    def test_divide_negative_numbers(self):
         self.assertEqual(divide(-10, 2), -5)
-        self.assertEqual(divide(0, 1), 0)
-        self.assertEqual(divide(5.5, 2.2), 2.5)
-
-    # Test cases for validate_input function
-    def test_validate_input(self):
-        self.assertEqual(validate_input("3 + 4"), (3.0, '+', 4.0))
-        self.assertEqual(validate_input("-3 * -4"), (-3.0, '*', -4.0))
-        self.assertEqual(validate_input("1 - 0"), (1.0, '-', 0.0))
-        self.assertEqual(validate_input("5 /"), (None, None, None))
-        self.assertEqual(validate_input("hello + world"), (None, None, None))
-        self.assertEqual(validate_input("10 / 2.5"), (10.0, '/', 2.5))
-        self.assertEqual(validate_input("10.5 * 4.0"), (10.5, '*', 4.0))
-        self.assertEqual(validate_input("5 & 4"), (None, None, None))  # Invalid operator case
-
-    # Test edge cases for validation input
-    def test_validate_input_edge_cases(self):
-        self.assertEqual(validate_input("5.0 + 2.0"), (5.0, '+', 2.0))
-        self.assertEqual(validate_input("5 + "), (None, None, None))
-        self.assertEqual(validate_input(" + 5"), (None, None, None))
-        self.assertEqual(validate_input(""), (None, None, None))
-        self.assertEqual(validate_input("5 + 6 + 7"), (None, None, None))  # More than 3 parts
-
-if __name__ == '__main__':
-    unittest.main()
-```
-
-### Explanation of Tests:
-1. **Standard Operations**: Each arithmetic function (`add`, `subtract`, `multiply`, `divide`) is tested with positive, negative, zero, and fractional numbers to ensure they handle a wide range of inputs correctly.
-2. **Edge Cases**: Tests cover boundary conditions, such as division by zero for the `divide` function, and ensure that functions handle `None` inputs from `validate_input` appropriately.
-3. **Input Validation**: Tests for the `validate_input` function ensure that expected and unexpected formats return the correct parsed values or `None` where appropriate.
-4. **Error Handling**: Tests ensure that the system returns the appropriate error messages as indicated in the review comments.
-
-### How to Run:
-You can run the test cases by saving them in a file named `tests.py` and executing the Python script using the command `python tests.py` in your terminal.
+        self.assertEqual(divide(10
