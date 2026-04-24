@@ -1,5 +1,5 @@
-# Project Requirement for Simple Calculator App
+# Project Requirement for Simple Calculator
 
 ## Requirements
-- Simple Python Application
-- No code heavy- less than 100 lines of code
+- Basic Functionality
+- No UI

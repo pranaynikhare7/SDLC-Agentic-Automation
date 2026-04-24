@@ -11,8 +11,8 @@ st.set_page_config(page_title="AI SDLC Designer", layout="wide")
 # --- Initialize Backend ---
 @st.cache_resource
 def get_executor():
-    llm = ChatGroq(model='openai/gpt-oss-20b')
-    # llm = ChatOpenAI(model = 'gpt-4o-mini')
+    # llm = ChatGroq(model='openai/gpt-oss-20b')
+    llm = ChatOpenAI(model = 'gpt-4o-mini')
     builder = GraphBuilder(llm)
     graph = builder.setup_graph()
     return GraphExecutor(graph)
@@ -104,7 +104,8 @@ elif next_step == "human_design_review":
     
     t1, t2 = st.tabs(["📄 Functional Design", "💻 Technical Design"])
     with t1: st.markdown(design_dict.get('functional', ''))
-    with t2: st.markdown(f"```markdown\n{design_dict.get('technical', '')}\n```")
+    # with t2: st.markdown(f"```markdown\n{design_dict.get('technical', '')}\n```")
+    with t2: st.markdown(design_dict.get('technical', ''))
 
     st.divider()
     c1, c2 = st.columns(2)
@@ -207,7 +208,39 @@ elif next_step == "human_test_review":
 elif next_step == "human_final_qa_review":
     st.subheader("🧐 Phase 6: Final QA Review")
     st.markdown("### QA Testing Results")
-    st.error(state.get("qa_testing_comments", "Testing data missing..."))
+
+    # Replace the st.error block with this:
+
+    import re
+
+    with st.expander("📊 Detailed QA Report", expanded=True):
+        # 1. Use the correct key from your QANode/State definition
+        qa_results = state.get("qa_testing_comments", "") 
+
+        # 2. Use Regex for robust counting (handles **Status:**, Status: , etc.)
+        # This looks for 'status', followed by optional characters like '*' or ':', then 'pass'
+        pass_count = len(re.findall(r"status[:\s\*]*pass", qa_results, re.IGNORECASE))
+        fail_count = len(re.findall(r"status[:\s\*]*fail", qa_results, re.IGNORECASE))
+        total = pass_count + fail_count
+
+        # 3. Display Metrics
+        col1, col2 = st.columns(2)
+        col1.metric("Tests Passed", f"{pass_count}/{total}", delta=None)
+        col2.metric("Tests Failed", f"{fail_count}/{total}", 
+                    delta=f"-{fail_count}" if fail_count > 0 else None, 
+                    delta_color="inverse")
+
+        st.divider()
+
+        # 4. Display the report
+        if qa_results:
+            st.markdown(qa_results)
+        else:
+            st.warning("No QA testing data found in state.")
+
+
+
+
 
     st.divider()
     c1, c2 = st.columns(2)
