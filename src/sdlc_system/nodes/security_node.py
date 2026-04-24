@@ -42,8 +42,6 @@ class SecurityNode:
     def security_review(self, state: SDLCState):
         return state
     
-    def fix_code_after_security_review(self, state: SDLCState):
-        pass
     
     def security_review_router(self, state: SDLCState):
         """

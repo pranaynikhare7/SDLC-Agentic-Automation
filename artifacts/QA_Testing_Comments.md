@@ -1,102 +1,110 @@
 # QA Testing Comments for Simple Calculator App
 
-**Test Results**
+**No test cases were supplied.**  
+Because the “Test Cases” block in your message is empty, I cannot run or evaluate any tests against the provided `main.py` and `calculator.py` code.  
 
-| Test Case ID | Status | Feedback |
-|--------------|--------|----------|
-| **pytest – test_add** | Pass | `add(1, 2)` correctly returns `3`; `add(-1, 1)` correctly returns `0`. |
-| **pytest – test_subtract** | Pass | `subtract(5, 3)` and `subtract(0, 5)` return the expected values. |
-| **pytest – test_multiply** | Pass | `multiply(4, 5)` and `multiply(-2, 3)` produce the correct products. |
-| **pytest – test_divide** | Pass | `divide(10, 2)` yields `5`; the `ZeroDivisionError` is correctly raised when the denominator is `0`. |
-| **unittest – TestArithmeticFunctions.test_add** | **Fail** | Import error: `calculator` does not expose `OPS` or `VALID_OPS`. The test module fails to import, so this test never runs. |
-| **unittest – TestArithmeticFunctions.test_subtract** | **Fail** | Same import error as above – the entire test module is skipped. |
-| **unittest – TestArithmeticFunctions.test_multiply** | **Fail** | Same import error – test not executed. |
-| **unittest – TestArithmeticFunctions.test_divide** | **Fail** | Same import error – test not executed. |
-| **unittest – TestArithmeticFunctions.test_divide_with_float_denominator** | **Fail** | Same import error – test not executed. |
-| **unittest – TestArithmeticFunctions.test_divide_negative_numbers** | **Fail** | Same import error – test not executed. |
-| **unittest – test_calculator_unittest.py** | **Fail** | The file contains a syntax error – the `test_divide_negative_numbers` method is truncated (`self.assertEqual(divide(10` is incomplete). Even if this were fixed, the missing `OPS`/`VALID_OPS` definitions would still cause an ImportError. |
+Below is a quick checklist of what you could do next, followed by a set of example test cases that would exercise the critical paths in the code. After that I’ll point out a few subtle bugs / inconsistencies in the current implementation and suggest improvements.
 
 ---
 
-### Why the `unittest` tests are failing
+## 1. What you need to do next
 
-1. **Missing Symbols**  
-   The `calculator.py` module only defines the functions `add`, `subtract`, `multiply`, `divide`, `get_operand`, `get_operation`, and `main`. It does **not** expose `OPS` or `VALID_OPS`. The import line  
-   ```python
-   from calculator import add, subtract, multiply, divide, get_operand, get_operation, main, OPS, VALID_OPS
-   ```  
-   therefore raises an `ImportError` before any tests run.
+1. **Add real test cases** – either in a separate test file (e.g., `test_calculator.py`) or as a list of input strings you want to feed into the REPL.  
+2. **Decide the test framework** – `unittest`, `pytest`, or even simple assertions in a script.  
+3. **Run the tests** – capture the output and compare against expected results.  
 
-2. **Syntax Error**  
-   The `test_divide_negative_numbers` method is incomplete (`self.assertEqual(divide(10`), causing a `SyntaxError` that stops the test file from being parsed.
-
-3. **Uncovered Interactive Functions**  
-   The tests never exercise `get_operand`, `get_operation`, or `main`. While not a failure per se, this leaves a gap in coverage.
+Once you provide the test cases, I can simulate the runs and give you a pass/fail report.
 
 ---
 
-### Suggested Fixes
+## 2. Suggested Test Cases (as a starting point)
 
-| Issue | Fix |
-|-------|-----|
-| **Missing `OPS` / `VALID_OPS`** | Either add the definitions to `calculator.py` (e.g. `OPS = {"+": add, "-": subtract, "*": multiply, "/": divide}` and `VALID_OPS = set(OPS)`) **or** remove them from the import list in the test file. |
-| **Syntax Error in Test File** | Complete the `test_divide_negative_numbers` method, e.g.:<br>`self.assertEqual(divide(10, 2), 5)`<br>`self.assertEqual(divide(-10, 2), -5)`<br>`self.assertEqual(divide(10, -2), -5)` |
-| **Coverage of Interactive Functions** | Add unit tests that patch `builtins.input` and `builtins.print` to verify `get_operand`, `get_operation`, and `main`. Example:<br>`@patch('builtins.input', side_effect=['5', '2', '+'])\n@patch('builtins.print')\ndef test_main(self, mock_print, mock_input):\n    main()\n    mock_print.assert_called_with('Result: 7')` |
-| **Consistent Test Naming** | Keep the test module names consistent (`test_calculator_pytest.py` vs. `test_calculator_unittest.py`) to avoid confusion. |
-| **Documentation** | Add docstrings to the arithmetic functions to clarify expected input types and error conditions. |
+| ID | Input string | Expected stdout (partial) | Reason |
+|----|--------------|---------------------------|--------|
+| TC01 | `1 + 2` | `Result: 3.0` | Basic addition |
+| TC02 | `5 / 0` | `Error: Division by zero is not allowed.` | `parse_input` should reject division by zero |
+| TC03 | `10 * 3` | `Result: 30.0` | Multiplication |
+| TC04 | `7 - 4` | `Result: 3.0` | Subtraction |
+| TC05 | `9 / 3` | `Result: 3.0` | Division (valid) |
+| TC06 | `foo + bar` | `Error: Operands must be numeric.` | Non‑numeric operands |
+| TC07 | `2 ^ 3` | `Error: Unsupported operator.` | Unsupported operator |
+| TC08 | `1 + 2 + 3` | `Error: Invalid input. Use: operand1 operator operand2` | Too many tokens |
+| TC09 | `1 +` | `Error: Invalid input. Use: operand1 operator operand2` | Too few tokens |
+| TC10 | `quit` | `Goodbye!` | Exit command |
+| TC11 | `EXIT` | `Goodbye!` | Case‑insensitive exit |
+| TC12 | `5 / 0` (directly via `calculate` function) | `inf` | `calculate` returns `inf` for division by zero – inconsistency |
 
----
-
-### Updated `calculator.py` (minimal patch)
+> **How to run**  
+> If you use `pytest`, you could write something like:
 
 ```python
-#!/usr/bin/env python3
-"""
-Simple Calculator App
-"""
+import subprocess
 
-def add(a: float, b: float) -> float:
-    """Return the sum of a and b."""
-    return a + b
+def run_calc(input_line):
+    proc = subprocess.Popen(
+        ['python', 'main.py'],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+    out, err = proc.communicate(input_line + '\n')
+    return out.strip()
 
-def subtract(a: float, b: float) -> float:
-    """Return the difference of a and b."""
-    return a - b
+def test_addition():
+    assert "Result: 3.0" in run_calc("1 + 2")
+```
 
-def multiply(a: float, b: float) -> float:
-    """Return the product of a and b."""
-    return a * b
+---
 
-def divide(a: float, b: float) -> float:
-    """Return the quotient of a divided by b.
+## 3. Feedback on the Current Code
 
-    Raises:
-        ZeroDivisionError: If b is zero (or -0.0).
-    """
-    if b == 0:
-        raise ZeroDivisionError("Division by zero")
-    return a / b
+| Issue | Explanation | Suggested Fix |
+|-------|-------------|---------------|
+| **Inconsistent division‑by‑zero handling** | `parse_input` raises `ValueError("Division by zero is not allowed.")` when `b == 0`, but `calculate` still returns `float("inf")` for `/` if it somehow bypasses the check. | Remove the division‑by‑zero check from `calculate` (or vice‑versa). Keep the check only in one place to avoid contradictory behavior. |
+| **Redundant `if op == "/" and b == 0` in `parse_input`** | Already handled by the lambda in `OPERATORS` (`/` returns `inf`). But the check in `parse_input` makes the lambda unreachable for zero denominators. | Either delete the check from `parse_input` and let `calculate` decide, or keep the check and change the lambda to raise an exception instead of returning `inf`. |
+| **Error messages are not unit‑testable** | `main()` prints directly to stdout. This makes it hard to assert on output in unit tests. | Refactor `main()` to return a string (or use a logger) so tests can capture the message. |
+| **No input validation for whitespace** | `line.strip()` removes leading/trailing whitespace, but internal multiple spaces are collapsed by `split()`. That’s fine, but you might want to reject empty lines or lines that only contain whitespace. | Add a guard: `if not line: continue` after stripping. |
+| **`parse_input` accepts any string that can be cast to `float`** | This means inputs like `"1e3"` or `"NaN"` are accepted. Depending on your spec, you may want to restrict to integers or specific numeric formats. | Add a stricter validation regex if needed. |
+| **`OPERATORS` dictionary is defined at module level** | Fine for this simple script, but if you later add more operators or need to localize the dictionary, consider moving it into a class or a factory function. | Keep as is for now; refactor only if the feature set expands. |
+| **`main()` uses `input("calc> ")`** | When testing via subprocess, you need to provide the newline; otherwise the program hangs. | In tests, always send a newline after each command. |
 
-def get_operand(prompt: str) -> float:
-    """Prompt the user for a numeric operand, reprompting on invalid input."""
-    while True:
-        try:
-            return float(input(prompt))
-        except ValueError:
-            print("Invalid number. Please try again.")
+---
 
-def get_operation() -> str:
-    """Prompt the user to choose a valid operation symbol."""
-    ops = {"+": add, "-": subtract, "*": multiply, "/": divide}
-    while True:
-        op = input("Select operation (+, -, *, /): ").strip()
-        if op in ops:
-            return op
-        print("Invalid operation. Please choose from +, -, *, /.")
+## 4. Suggested Code Improvements
 
-# Expose the operation mapping for external use (tests or other modules)
-OPS = {"+": add, "-": subtract, "*": multiply, "/": divide}
-VALID_OPS = set(OPS)
+1. **Centralise division‑by‑zero handling**  
+   ```python
+   def calculate(a, op, b):
+       if op == "/" and b == 0:
+           raise ZeroDivisionError("Division by zero is not allowed.")
+       return OPERATORS[op](a, b)
+   ```
 
-def main() -> None:
-    """Run
+2. **Make `main()` test‑friendly**  
+   ```python
+   def main_loop():
+       while True:
+           ...
+           yield output  # Instead of printing directly
+   ```
+
+3. **Add a `__main__` guard that uses `main_loop()`**  
+   ```python
+   if __name__ == "__main__":
+       for line in main_loop():
+           print(line)
+   ```
+
+4. **Add unit tests for `parse_input` and `calculate`** – this isolates logic from I/O.
+
+---
+
+## 5. Summary
+
+- **No tests were provided** → cannot determine pass/fail status.  
+- **Suggested test cases** cover normal operations, error handling, and edge conditions.  
+- **Current code has a subtle bug**: division by zero is handled inconsistently between parsing and calculation.  
+- **Improvement ideas**: unify error handling, refactor I/O for testability, and tighten numeric validation.
+
+Once you supply the actual test cases (or let me know which of the above examples you want to run), I can simulate the runs and give you a detailed pass/fail report.

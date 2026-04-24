@@ -1,62 +1,95 @@
 # Test Cases for Simple Calculator App
 
 
+Certainly! Below are comprehensive test cases written in Python using the `unittest` framework. These tests cover various scenarios, including valid operations, edge cases, and error handling as highlighted in the review comments. 
+
+### Test Cases in Python's `unittest` Framework
+
 ```python
-# test_calculator_unittest.py
-"""
-Unit‑tests for the `calculator` module using the standard unittest framework.
-All public functions are exercised, including edge‑cases, error handling and
-the interactive helper functions that use `input()`/`print()`.
-"""
-
-import math
-import sys
-import types
+# test_calculator.py
 import unittest
-from unittest.mock import patch, MagicMock
+from calculator import Calculator
 
-import calculator
-from calculator import add, subtract, multiply, divide, get_operand, get_operation, main, OPS, VALID_OPS
+class TestCalculator(unittest.TestCase):
 
+    def setUp(self):
+        self.calc = Calculator()
 
-class TestArithmeticFunctions(unittest.TestCase):
-    """Pure functions – add, subtract, multiply, divide."""
+    def test_addition(self):
+        self.assertEqual(self.calc.add(1, 2), 3)
+        self.assertEqual(self.calc.add(-1, 1), 0)
+        self.assertEqual(self.calc.add(-1, -1), -2)
 
-    def test_add(self):
-        # integer + integer
-        self.assertEqual(add(1, 2), 3)
-        # negative + positive
-        self.assertEqual(add(-1, 1), 0)
-        # float + float
-        self.assertAlmostEqual(add(0.1, 0.2), 0.30000000000000004)
+    def test_subtraction(self):
+        self.assertEqual(self.calc.subtract(5, 3), 2)
+        self.assertEqual(self.calc.subtract(3, 5), -2)
+        self.assertEqual(self.calc.subtract(-1, -1), 0)
 
-    def test_subtract(self):
-        self.assertEqual(subtract(5, 3), 2)
-        self.assertEqual(subtract(0, 5), -5)
-        self.assertAlmostEqual(subtract(0.3, 0.1), 0.19999999999999996)
+    def test_multiplication(self):
+        self.assertEqual(self.calc.multiply(4, 5), 20)
+        self.assertEqual(self.calc.multiply(-1, 1), -1)
+        self.assertEqual(self.calc.multiply(0, 10), 0)
 
-    def test_multiply(self):
-        self.assertEqual(multiply(4, 5), 20)
-        self.assertEqual(multiply(-2, 3), -6)
-        # large numbers → overflow to inf
-        self.assertTrue(math.isinf(multiply(1e308, 1e308)))
+    def test_division(self):
+        self.assertEqual(self.calc.divide(10, 2), 5)
+        self.assertEqual(self.calc.divide(-10, 2), -5)
+        self.assertEqual(self.calc.divide(0, 1), 0)
+        self.assertEqual(self.calc.divide(1, 0), "Error: Division by zero is not allowed.")
 
-    def test_divide(self):
-        self.assertEqual(divide(10, 2), 5)
-        self.assertAlmostEqual(divide(7, 3), 7 / 3)
+    def test_calculate(self):
+        self.assertEqual(self.calc.calculate('+', 5, 3), 8)
+        self.assertEqual(self.calc.calculate('-', 5, 3), 2)
+        self.assertEqual(self.calc.calculate('*', 5, 3), 15)
+        self.assertEqual(self.calc.calculate('/', 6, 3), 2)
 
-        # Division by zero
-        with self.assertRaises(ZeroDivisionError):
-            divide(5, 0)
-        with self.assertRaises(ZeroDivisionError):
-            divide(5, -0.0)
+        # Edge case: Division by zero
+        self.assertEqual(self.calc.calculate('/', 6, 0), "Error: Division by zero is not allowed.")
 
-        # Very small denominator → huge result (may become inf)
-        self.assertTrue(math.isinf(divide(1e308, 1e-308)))
+        # Invalid operation
+        self.assertEqual(self.calc.calculate('%', 6, 3), "Error: Invalid operation.")
 
-    def test_divide_with_float_denominator(self):
-        self.assertAlmostEqual(divide(1.5, 0.5), 3.0)
+# test_main.py
+from unittest.mock import patch
+import unittest
+import builtins
+from main import main
 
-    def test_divide_negative_numbers(self):
-        self.assertEqual(divide(-10, 2), -5)
-        self.assertEqual(divide(10
+class TestMain(unittest.TestCase):
+
+    @patch('builtins.input', side_effect=['5', '+', '3', 'yes', '2', '-', '1', 'no'])
+    @patch('builtins.print')
+    def test_main_valid_operations(self, mock_print, mock_input):
+        main()
+        mock_print.assert_any_call("Result:", 8)  # 5 + 3
+        mock_print.assert_any_call("Result:", 1)  # 2 - 1
+
+    @patch('builtins.input', side_effect=['5', '/', '0', 'yes', 'a', 'yes', '3', '*', '2', 'no'])
+    @patch('builtins.print')
+    def test_main_invalid_operations(self, mock_print, mock_input):
+        main()
+        mock_print.assert_any_call("Error: Please enter valid numeric values.")  # 'a' input
+        mock_print.assert_any_call("Result:", "Error: Division by zero is not allowed.")  # 5 / 0
+        mock_print.assert_any_call("Result:", 6)  # 3 * 2
+
+    @patch('builtins.input', side_effect=['1', '/', '0', 'no'])
+    @patch('builtins.print')
+    def test_main_division_by_zero(self, mock_print, mock_input):
+        main()
+        mock_print.assert_called_with("Result:", "Error: Division by zero is not allowed.")
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+### Explanation of the Test Cases
+1. **Test for Calculator Class:**
+   - **Addition, Subtraction, Multiplication, Division:** Each arithmetic operation is tested for various inputs including positive, negative, and zero.
+   - **Division by Zero:** Validates that attempting to divide by zero returns the correct error message.
+   - **Calculator Operations:** Tests the `calculate` method for valid operations and checks that invalid operations return the expected error message.
+
+2. **Test for Main Function:**
+   - **Valid Operations:** Mocks user input to simulate several valid operations and checks that the result printed is correct.
+   - **Invalid Operations:** Tests how the program handles initial invalid inputs and checks if the right error messages are displayed for non-numeric values and division by zero.
+   - **Edge Case for Division by Zero:** Specifically tests the handling of division by zero within the main program loop.
+
+These tests ensure thorough coverage and capture various edge cases while maintaining functionality as outlined in the review comments.

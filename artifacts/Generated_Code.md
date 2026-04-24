@@ -1,76 +1,54 @@
 # Generated Code for Simple Calculator App
 
 
-# calculator.py
-```python
+# main.py
 #!/usr/bin/env python3
-"""
-Simple Calculator App
-"""
+from calculator import parse_input, calculate
 
-def add(a: float, b: float) -> float:
-    return a + b
-
-def subtract(a: float, b: float) -> float:
-    return a - b
-
-def multiply(a: float, b: float) -> float:
-    return a * b
-
-def divide(a: float, b: float) -> float:
-    if b == 0:
-        raise ZeroDivisionError("Division by zero")
-    return a / b
-
-def get_operand(prompt: str) -> float:
+def main():
     while True:
         try:
-            return float(input(prompt))
-        except ValueError:
-            print("Invalid number. Please try again.")
-
-def get_operation() -> str:
-    ops = {"+": add, "-": subtract, "*": multiply, "/": divide}
-    while True:
-        op = input("Select operation (+, -, *, /): ").strip()
-        if op in ops:
-            return op
-        print("Invalid operation. Please choose from +, -, *, /.")
-
-def main() -> None:
-    a = get_operand("Enter first number: ")
-    b = get_operand("Enter second number: ")
-    op = get_operation()
-    ops = {"+": add, "-": subtract, "*": multiply, "/": divide}
-    try:
-        result = ops[op](a, b)
+            line = input("calc> ").strip()
+        except EOFError:
+            break
+        if line.lower() in ("quit", "exit"):
+            print("Goodbye!")
+            break
+        tokens = line.split()
+        if len(tokens) != 3:
+            print("Error: Invalid input. Use: operand1 operator operand2")
+            continue
+        try:
+            a, op, b = parse_input(tokens)
+        except ValueError as e:
+            print(f"Error: {e}")
+            continue
+        result = calculate(a, op, b)
         print(f"Result: {result}")
-    except ZeroDivisionError:
-        print("Error: Division by zero")
 
 if __name__ == "__main__":
     main()
-```
+    
+# calculator.py
+OPERATORS = {
+    "+": lambda a, b: a + b,
+    "-": lambda a, b: a - b,
+    "*": lambda a, b: a * b,
+    "/": lambda a, b: a / b if b != 0 else float("inf"),
+}
 
-# test_calculator.py
-```python
-import pytest
-from calculator import add, subtract, multiply, divide
+def parse_input(tokens):
+    a, op, b = tokens
+    try:
+        a = float(a)
+        b = float(b)
+    except ValueError:
+        raise ValueError("Operands must be numeric.")
+    if op not in OPERATORS:
+        raise ValueError("Unsupported operator.")
+    if op == "/" and b == 0:
+        raise ValueError("Division by zero is not allowed.")
+    return a, op, b
 
-def test_add():
-    assert add(1, 2) == 3
-    assert add(-1, 1) == 0
-
-def test_subtract():
-    assert subtract(5, 3) == 2
-    assert subtract(0, 5) == -5
-
-def test_multiply():
-    assert multiply(4, 5) == 20
-    assert multiply(-2, 3) == -6
-
-def test_divide():
-    assert divide(10, 2) == 5
-    with pytest.raises(ZeroDivisionError):
-        divide(5, 0)
-```
+def calculate(a, op, b):
+    return OPERATORS[op](a, b)

@@ -49,8 +49,6 @@ class TestNode:
     def review_test_cases(self, state: SDLCState):
         return state
     
-    def revise_test_cases(self, state: SDLCState):
-        pass
     
     def review_test_cases_router(self, state: SDLCState):
         """

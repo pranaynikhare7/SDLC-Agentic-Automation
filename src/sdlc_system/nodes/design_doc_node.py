@@ -139,8 +139,6 @@ class DesingDocumentNode:
     def review_design_documents(self, state: SDLCState):
         return state
     
-    def revise_design_documents(self, state: SDLCState):
-        pass
     
     def review_design_documents_router(self, state: SDLCState):
         """

@@ -86,8 +86,6 @@ class CodingNode:
     def code_review(self, state: SDLCState):
         return state
     
-    def fix_code(self, state: SDLCState):
-        pass
     
     def code_review_router(self, state: SDLCState):
         """

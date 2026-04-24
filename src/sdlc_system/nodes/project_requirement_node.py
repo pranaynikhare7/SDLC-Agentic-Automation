@@ -52,8 +52,6 @@ class ProjectRequirementNode:
     def review_user_stories(self, state: SDLCState):
         return state
     
-    def revise_user_stories(self, state: SDLCState):
-        pass
-    
+
     def review_user_stories_router(self, state: SDLCState):
         return state.get("user_stories_review_status", "approved")  # default to "approved" if not present

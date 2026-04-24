@@ -70,7 +70,7 @@ elif not next_step:
 
 # Stage 3: Review User Stories
 elif next_step == "human_po_review":
-    st.subheader("📋 Phase 1: Human Product Owner Review")
+    st.subheader("📋 Phase 1: Reviewing User stories - Product Owner")
     stories_data = state.get("user_stories", {})
     stories = stories_data.user_stories if hasattr(stories_data, 'user_stories') else stories_data.get('user_stories', [])
     
@@ -91,14 +91,14 @@ elif next_step == "human_po_review":
         with st.popover("🔄 Revise Stories"):
             fback = st.text_area("What should change in stories?")
             if st.button("Submit Story Feedback"):
-                with st.spinner("Refinement Agent is revising stories..."):
+                with st.spinner("Business Analyst is revising stories..."):
                     response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_user_stories")
                     st.session_state.current_state = response["state"]
                     st.rerun()
 
 # Stage 4: Review Design Documents
 elif next_step == "human_design_review":
-    st.subheader("🏗️ Phase 2: Human Architecture Review")
+    st.subheader("🏗️ Phase 2: Architecture Review")
     design = state.get("design_documents", {})
     design_dict = design.model_dump() if hasattr(design, "model_dump") else design
     
@@ -118,14 +118,14 @@ elif next_step == "human_design_review":
         with st.popover("🔄 Revise Design"):
             fback = st.text_area("What should change in design?")
             if st.button("Submit Design Feedback"):
-                with st.spinner("Design Iteration Agent is revising..."):
+                with st.spinner("Architect Agent is revising designs..."):
                     response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_design_documents")
                     st.session_state.current_state = response["state"]
                     st.rerun()
 
 # Stage 5: Code Review
 elif next_step == "human_code_review":
-    st.subheader("💻 Phase 3: Human Code Review")
+    st.subheader("💻 Phase 3: Code Review")
     col_code, col_review = st.columns([2, 1])
     with col_code:
         st.markdown("**Generated Code**")
@@ -138,7 +138,7 @@ elif next_step == "human_code_review":
     c1, c2 = st.columns(2)
     with c1:
         if st.button("✅ Approve Code", use_container_width=True):
-            with st.spinner("CISO Agent is running security review..."):
+            with st.spinner("Security Consultant Agent is running security review..."):
                 response = executor.graph_review_flow(st.session_state.task_id, "approved", "", "review_code")
                 st.session_state.current_state = response["state"]
                 st.rerun()
@@ -146,14 +146,14 @@ elif next_step == "human_code_review":
         with st.popover("🔄 Request Code Fix"):
             fback = st.text_area("Specify changes/fixes needed:")
             if st.button("Submit Code Feedback"):
-                with st.spinner("Patching Agent is refactoring code..."):
+                with st.spinner("Developer Agent is refactoring code..."):
                     response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_code")
                     st.session_state.current_state = response["state"]
                     st.rerun()
 
 # Stage 6: Security Review
 elif next_step == "human_security_review":
-    st.subheader("🔒 Phase 4: Human Security Review")
+    st.subheader("🔒 Phase 4: Security Review")
     t1, t2 = st.tabs(["🛡️ Security Recommendations", "📝 Auditor Comments"])
     with t1: st.warning(state.get("security_recommendations", "Scanning complete (No data returned)."))
     with t2: st.markdown(state.get("security_review_comments", "N/A"))
@@ -170,14 +170,14 @@ elif next_step == "human_security_review":
         with st.popover("🚨 Security Feedback"):
             fback = st.text_area("Describe security vulnerabilities to fix:")
             if st.button("Send Back to Coding"):
-                with st.spinner("Hardening Agent is applying patches..."):
+                with st.spinner("Developer Agent is applying patches..."):
                     response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_security_recommendations")
                     st.session_state.current_state = response["state"]
                     st.rerun()
 
 # Stage 7: Review Test Cases
 elif next_step == "human_test_review":
-    st.subheader("🧪 Phase 5: Human Test Plan Review")
+    st.subheader("🧪 Phase 5: Test Plan Review")
     st.markdown("### Generated Test Suite")
     
     test_cases = state.get("test_cases", "")
@@ -198,14 +198,14 @@ elif next_step == "human_test_review":
         with st.popover("🔄 Revise Test Cases"):
             fback = st.text_area("What is missing in the test cases?")
             if st.button("Submit Test Feedback"):
-                with st.spinner("Test Refinement Agent is regenerating..."):
+                with st.spinner("SDET Agent is regenerating..."):
                     response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_test_cases")
                     st.session_state.current_state = response["state"]
                     st.rerun()
 
 # Stage 8: QA Review
 elif next_step == "human_final_qa_review":
-    st.subheader("🧐 Phase 6: Human Final QA Review")
+    st.subheader("🧐 Phase 6: Final QA Review")
     st.markdown("### QA Testing Results")
     st.error(state.get("qa_testing_comments", "Testing data missing..."))
 
@@ -221,7 +221,7 @@ elif next_step == "human_final_qa_review":
         with st.popover("🐞 Bugs Found - Reject"):
             fback = st.text_area("List bugs to be fixed in the code:")
             if st.button("Submit Bug Report"):
-                with st.spinner("Sending bugs back to engineering..."):
+                with st.spinner("Sending bugs back to developer agent..."):
                     response = executor.graph_review_flow(st.session_state.task_id, "feedback", fback, "review_qa_testing")
                     st.session_state.current_state = response["state"]
                     st.rerun()
