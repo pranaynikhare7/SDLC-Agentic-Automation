@@ -1,104 +1,222 @@
 # 🛡️ AI SDLC Automation System
 
-Welcome to the AI Software Development Life Cycle (SDLC) Automation System!
+An AI-driven Multi-Agent Orchestrator designed for rapid POC development, streamlining the end-to-end SDLC to deliver functional software prototypes at generative speeds.
 
-This project acts like your own personal AI software engineering team. It uses Large Language Models (LLMs) and LangGraph to automate the entire software creation process. From a simple text prompt, this system will guide you step-by-step through generating requirements, writing code, checking for security flaws, and creating test cases.
+![LangGraph](https://img.shields.io/badge/LangGraph-Orchestration-blue)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-green)
+![Python](https://img.shields.io/badge/Python-3.9+-blue)
+![Streamlit](https://img.shields.io/badge/Streamlit-UI-red)
 
-Because it uses a "Human-in-the-Loop" workflow, it pauses at every major step to let you review, approve, or ask for revisions before moving forward!
+## Table of Contents
 
----
+- [Abstract](#abstract)
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
+- [License](#license)
 
-## ✨ Features
+## Abstract
 
-* 📝 **Requirement Gathering:** Converts plain text ideas into structured Agile User Stories.
-* 🏗️ **Architecture Design:** Generates comprehensive Functional and Technical Design Documents (FDD & TDD).
-* 💻 **Code Generation:** Writes modular, multi-file Python code based on the approved designs.
-* 🔒 **Security Review:** Scans the generated code for vulnerabilities and applies fixes.
-* 🧪 **Test Engineering:** Writes a complete unittest suite for the generated code.
-* 🧐 **QA Simulation:** Simulates running the tests to ensure the code actually works.
-* 📦 **Download Artifacts:** Packages all generated code, tests, and documentation into a neat `.zip` file for you to download.
+### Background
+In a fast-paced Generative AI landscape, the ability to prototype rapidly is a competitive necessity. Traditional software development cycles often become bottlenecks for Proof of Concept (POC) initiatives, where the manual translation of requirements into design, code, and test cases slows the turnaround time required to present value to stakeholders.
 
----
+### Motivation
+While modern LLMs can generate code snippets, they often lack the systemic context and rigorous structure needed to deliver a cohesive, working demo. This project aims to bridge that gap by providing a stateful, multi-agent framework that accelerates the "idea-to-working-prototype" pipeline. By maintaining a Human-in-the-Loop (HITL) approach, we ensure that rapid automation is balanced with human oversight to meet specific stakeholder expectations.
 
-## 🚀 Getting Started
+### Proposed Solution
+This system utilizes **LangGraph** to orchestrate a high-efficiency cyclical workflow where specialized agents (Business Analyst, Architect, Developer, Security, and QA) manage the SDLC in parallel. To accommodate the dynamic nature of POC development, **Redis** handles session persistence, allowing users to pause, iterate based on real-time stakeholder feedback, and resume sessions without losing progress.
 
-Follow these simple steps to run the application on your local machine.
+### Expected Outcomes
+✅ Rapid POC Turnaround: Drastically reduce the time between initial requirement gathering and a functional, demonstrable prototype.  
+✅ Stakeholder-Ready Artifacts: Instant generation of User Stories, FDD, and TDD to provide immediate technical clarity to project owners.  
+✅ Validated MVP Codebase: Modular Python implementations reinforced by automated security scans and unit test generation.  
+✅ Interactive Refinement Loop: A specialized Streamlit UI designed for real-time review, enabling developers to pivot and refactor code instantly based on QA or stakeholder input.
 
-### 1. Prerequisites
+## Key Features
 
-You will need to have Python 3.9+ installed. You will also need API keys for:
+- **Multi-Agent Orchestration** - Specialized agents for requirements, architecture, coding, security, and testing.
+- **Human-in-the-Loop (HITL)** - Persistent pause points at every stage for human approval or revision.
+- **Stateful Persistence** - Redis-backed session management allowing developers to resume tasks using a Task ID.
+- **Security-First Coding** - Dedicated security agent to scan for vulnerabilities before test generation.
+- **Automated QA Simulation** - Simulates code execution and test pass/fail scenarios before artifact delivery.
+- **Artifact Packaging** - One-click download of all documentation and source code.
 
-* OpenAI: For the AI model (GPT-4o-mini).
-* Upstash Redis: A free cloud Redis database to save your session state so you don't lose progress during reviews. You can get a free database at Upstash.
+## Architecture
 
----
-
-### 2. Clone the Repository
-
-Download the code to your local machine:
-
-```bash
-git clone https://github.com/pranaynikhare7/SDLC-Agentic-Automation.git
+```text
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                                 STREAMLIT UI LAYER                                  │
+│        (State Visualization, Markdown Rendering, & Human Feedback Intake)           │
+└──────────────────────────────────────────┬──────────────────────────────────────────┘
+                                           │ User Input / Review Action
+                                           ▼
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                         LANGGRAPH & REDIS STATE MANAGER                             │
+│    (GraphExecutor: Thread Management, State Checkpointing, & Persistence)           │
+│    ┌────────────────────────┐                        ┌────────────────────────┐     │
+│    │   Graph Orchestration  │◄──────────────────────►│  Upstash Redis Cache   │     │
+│    │    (Logic Control)     │        Sync State      │   (Session Storage)    │     │
+│    └──────────┬─────────────┘                        └────────────────────────┘     │
+└───────────────┼─────────────────────────────────────────────────────────────────────┘
+                │ Resume / Execute Node
+                ▼
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                            SDLC PROCESS PIPELINE (Nodes)                            │
+│                                                                                     │
+│        [ AI AGENT TRACK ]                        [ HUMAN APPROVAL TRACK ]           │
+│      (Generative AI logic)                        (HITL Interrupt Points)           │
+│                │                                             │                      │
+│     ┌──────────┴──────────┐     User Stories      ┌──────────┴──────────┐           │
+│     │  Business Analyst   ├──────────────────────►│  HITL - PO Review   │           │
+│     └──────────▲──────────┘                       └──────────┬──────────┘           │
+│                │              [ REVISE ]                     │                      │
+│                └─────────────────────────────────────────────┤                      │
+│                                                              │ [ APPROVED ]         │
+│                ┌─────────────────────────────────────────────┘                      │
+│                │                                                                    │
+│     ┌──────────▼──────────┐       Design          ┌─────────────────────┐           │
+│     │   Architect Agent   ├──────────────────────►│ HITL-Design Review  │           │
+│     └──────────▲──────────┘                       └──────────┬──────────┘           │
+│                │              [ REVISE ]                     │                      │
+│                └─────────────────────────────────────────────┤                      │
+│                                                              │ [ APPROVED ]         │
+│                ┌─────────────────────────────────────────────┘                      │
+│                │                                                                    │
+│     ┌──────────▼──────────┐       Code            ┌─────────────────────┐           │
+│  ┌─►│   Developer Agent   ├──────────────────────►│  HITL - Code Review │           │
+│  │  └─────────────────────┘                       └──────────┬──────────┘           │
+│  │                        [ REVISE - BACK TO DEVELOPER ]     │                      │
+│  │◄──────────────────────────────────────────────────────────┤                      │
+│  │                                                           │ [ APPROVED ]         │
+│  │             ┌─────────────────────────────────────────────┘                      │
+│  │             │                                                                    │
+│  │  ┌──────────▼──────────┐   Recommendation      ┌─────────────────────┐           │
+│  │  │   Security Agent    ├──────────────────────►│ HITL Security Review│           │
+│  │  └─────────────────────┘                       └──────────┬──────────┘           │
+│  │                       [ REVISE - BACK TO DEVELOPER ]      │                      │
+│  │◄──────────────────────────────────────────────────────────┤                      │
+│  │                                                           │ [ APPROVED ]         │
+│  │             ┌─────────────────────────────────────────────┘                      │
+│  │             │                                                                    │
+│  │  ┌──────────▼──────────┐      Test Cases       ┌─────────────────────┐           │
+│  │  │     SDET Agent      ├──────────────────────►│ HITL - Test Review  │           │
+│  │  └──────────▲──────────┘                       └──────────┬──────────┘           │
+│  │             │              [ REVISE ]                     │                      │
+│  │             └─────────────────────────────────────────────┤                      │
+│  │                                                           │ [ APPROVED ]         │
+│  │             ┌─────────────────────────────────────────────┘                      │
+│  │             │                                                                    │
+│  │  ┌──────────▼──────────┐       QA Results      ┌─────────────────────┐           │
+│  │  │  QA Testing Agent   ├──────────────────────►│  HITL - QA Review   │           │
+│  │  └─────────────────────┘                       └──────────┬──────────┘           │
+│  │                                                           │                      │
+│  │                [ REJECT - BUGS FOUND ]                    │                      │
+│  └───────────────────────────────────────────────────────────┤                      │
+│                                                              │ [ APPROVED ]         │
+│                                                              ▼                      │
+│                                                   ┌────────────────────┐            │
+│                                                   │ Artifact Compiler  │            │
+│                                                   └────────────────────┘            │
+└─────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
----
+## Tech Stack
 
-### 3. Set Up Your Environment Variables
+| Component          | Technology                                           |
+| ------------------ | ---------------------------------------------------- |
+| **Orchestration** | LangGraph (Cyclical workflows with persistent state) |
+| **LLM** | OpenAI GPT-4o-mini                                   |
+| **State Storage** | Upstash Redis (Serverless Persistence)               |
+| **Web Framework** | Streamlit (Interactive UI)                           |
+| **Schema/Types** | Pydantic (Data validation and state structure)       |
+| **Core Libraries** | LangChain, LangChain-OpenAI, Python-Dotenv           |
 
-The application needs your API keys to work. Create a new file in the root folder of the project and name it exactly `.env`.
+## Installation
 
-Paste the following into your `.env` file and replace the placeholders with your actual keys:
+### Prerequisites
 
-```env
-# Your OpenAI API Key
-OPENAI_API_KEY=sk-your_openai_api_key_here
+- Python 3.9 or higher
+- OpenAI API Key
+- Upstash Redis URL & Token
 
-# Your Upstash Redis Credentials (find these in your Upstash Dashboard)
-UPSTASH_REDIS_REST_URL=[https://your-upstash-url.upstash.io](https://your-upstash-url.upstash.io)
-UPSTASH_REDIS_REST_TOKEN=your_upstash_token_here
+### Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone [https://github.com/pranaynikhare7/SDLC-Agentic-Automation.git](https://github.com/pranaynikhare7/SDLC-Agentic-Automation.git)
+   cd SDLC-Agentic-Automation
+   ```
+
+2. **Create and activate virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up environment variables**
+   Create a `.env` file in the root directory:
+   ```env
+   OPENAI_API_KEY=sk-your-key
+   UPSTASH_REDIS_REST_URL=[https://your-url.upstash.io](https://your-url.upstash.io)
+   UPSTASH_REDIS_REST_TOKEN=your-token
+   ```
+
+## Usage
+
+### Launching the System
+1. **Start the application**
+   ```bash
+   streamlit run app.py
+   ```
+2. **Access the UI**: Navigate to `http://localhost:8501`.
+
+### Interaction Workflow
+- **Initialize**: Provide a project name to generate a unique Task ID.
+- **Review Phases**: The system will pause for your approval after generating:
+    - User Stories
+    - Design Documents (Functional & Technical)
+    - Source Code & Security Review
+    - Test Suite & QA Results
+- **Resume**: Use your Task ID in the sidebar to return to an ongoing project.
+
+## Project Structure
+
+```text
+SDLC_Agentic_Automation/
+├── app.py                   # Main Streamlit Entry Point
+├── requirements.txt         # Project Dependencies
+├── .env                     # Environment Variables
+├── src/
+│   └── sdlc_system/
+│       ├── cache/           # Redis connection & session logic
+│       ├── graph/           # LangGraph definitions & Workflow logic
+│       ├── nodes/           # Individual AI Agent logic (Coding, Security, etc.)
+│       ├── state/           # Pydantic state definitions (TypedDict)
+│       ├── ui/              # Streamlit interface components
+│       └── utils/           # Utility Functions
+└── artifacts/               # Generated project outputs (MD, Python files)
 ```
 
----
+## Troubleshooting
 
-### 4. Install Dependencies
+### Redis Connection Error
+- Ensure your `UPSTASH_REDIS_REST_URL` includes the `https://` prefix.
+- Verify that your token does not have leading/trailing spaces.
 
-It is highly recommended to use a virtual environment. Install the required Python packages by running:
-
-```bash
-pip install -r requirements.txt
-```
-
-> (Note: If you don't have a requirements.txt yet, make sure you have installed: streamlit, langchain, langchain-openai, langgraph, upstash-redis, pydantic, and python-dotenv).
+### OpenAI Rate Limits
+- If using a Trial account, ensure you have not exceeded your monthly quota.
+- For high-concurrency needs, check your OpenAI tier status.
 
 ---
 
-### 5. Run the Application!
-
-Because this is a Streamlit web application, you start it using the streamlit run command. In your terminal, type:
-
-```bash
-streamlit run app.py
-```
-
-A browser window should automatically open to **[http://localhost:8501](http://localhost:8501)** displaying the AI SDLC Designer interface!
-
----
-
-## 💡 How to Use the App
-
-* **Start a Project:** Enter a project name and click "Initialize Workflow".
-* **Add Requirements:** Type out what you want your software to do in plain English.
-* **Review & Approve:** The AI will generate User Stories. You can either click ✅ Approve to move to the next phase, or 🔄 Revise to give the AI feedback to fix mistakes.
-* **Iterate:** Continue this process through Design, Code, Security, and Testing.
-* **Download:** Once the QA phase passes, click the download buttons to get your ZIP file containing all the generated Python files and Markdown documentation.
-
----
-
-## 📁 Project Structure Overview
-
-* `app.py`: The main entry point that launches the Streamlit app.
-* `src/sdlc_system/ui/streamlit_main.py`: Contains the frontend visual interface and layout.
-* `src/sdlc_system/graph/`: Contains the LangGraph setup that controls the flow from one AI step to the next.
-* `src/sdlc_system/nodes/`: The individual "brains" of the operation. Each file (e.g., coding_node.py, security_node.py) handles a specific phase of the software lifecycle.
-* `src/sdlc_system/cache/`: Connects to Redis to ensure your progress is saved securely.
-
+**Status**: 🚀 Active Development (Master's Specialization Project)  
+**Last Updated**: April 2026
