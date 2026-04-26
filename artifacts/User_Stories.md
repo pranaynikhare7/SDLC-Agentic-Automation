@@ -1,2 +1,2 @@
-# User Stories for Simple Calculator
+# User Stories for Simple Calculator App
 

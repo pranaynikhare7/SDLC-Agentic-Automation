@@ -1,4 +1,4 @@
-# Project Requirement for Simple Calculator
+# Project Requirement for Simple Calculator App
 
 ## Requirements
 - Basic Functionality

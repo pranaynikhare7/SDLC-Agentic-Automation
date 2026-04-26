@@ -1,111 +1,142 @@
-# Generated Code for Simple Calculator
+# Generated Code for Simple Calculator App
 
 
-```plaintext
-calculator.py
-```
 ```python
+# calculator_module.py
 class Calculator:
-    def add(self, operands):
-        return sum(operands)
+    def __init__(self):
+        pass
 
-    def subtract(self, operands):
-        return operands[0] - operands[1]
+    def add(self, num1, num2):
+        return num1 + num2
 
-    def multiply(self, operands):
-        result = 1
-        for num in operands:
-            result *= num
-        return result
+    def subtract(self, num1, num2):
+        return num1 - num2
 
-    def divide(self, operands):
-        if operands[1] == 0:
-            raise ZeroDivisionError("Cannot divide by zero.")
-        return operands[0] / operands[1]
+    def multiply(self, num1, num2):
+        return num1 * num2
+
+    def divide(self, num1, num2):
+        if num2 == 0:
+            raise ZeroDivisionError("Cannot divide by zero")
+        return num1 / num2
 ```
 
-```plaintext
-input_handler.py
-```
 ```python
-class InputHandler:
-    @staticmethod
-    def validate_inputs(operands):
-        if len(operands) != 2:
-            raise ValueError("Exactly two operands are required.")
-        for operand in operands:
-            if not isinstance(operand, (int, float)):
-                raise ValueError(f"Invalid operand: {operand}. Operands must be numeric.")
-```
+# app.py
+from flask import Flask, request, jsonify
+from calculator_module import Calculator
 
-```plaintext
-main.py
-```
-```python
-from calculator import Calculator
-from input_handler import InputHandler
+app = Flask(__name__)
+calculator = Calculator()
 
-def main():
-    calc = Calculator()
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    data = request.get_json()
+    num1 = data['num1']
+    num2 = data['num2']
+    operation = data['operation']
 
-    while True:
-        operation = input("Enter operation (add, subtract, multiply, divide) or 'exit' to quit: ")
-        
-        if operation == 'exit':
-            break
-        
+    if operation == 'add':
+        result = calculator.add(num1, num2)
+    elif operation == 'subtract':
+        result = calculator.subtract(num1, num2)
+    elif operation == 'multiply':
+        result = calculator.multiply(num1, num2)
+    elif operation == 'divide':
         try:
-            operands = list(map(float, input("Enter two numbers separated by space: ").split()))
-            InputHandler.validate_inputs(operands)
-
-            if operation == 'add':
-                print("Result:", calc.add(operands))
-            elif operation == 'subtract':
-                print("Result:", calc.subtract(operands))
-            elif operation == 'multiply':
-                print("Result:", calc.multiply(operands))
-            elif operation == 'divide':
-                print("Result:", calc.divide(operands))
-            else:
-                print("Invalid operation.")
-        
-        except ValueError as e:
-            print("Error:", e)
+            result = calculator.divide(num1, num2)
         except ZeroDivisionError as e:
-            print("Error:", e)
+            return jsonify({'error': str(e)}), 400
+    else:
+        return jsonify({'error': 'Invalid operation'}), 400
 
-if __name__ == "__main__":
-    main()
+    return jsonify({'result': result})
+
+@app.route('/healthcheck', methods=['GET'])
+def healthcheck():
+    return jsonify({'status': 'healthy'})
+
+if __name__ == '__main__':
+    app.run(debug=True)
 ```
 
-```plaintext
-test_calculator.py
-```
 ```python
-import unittest
-from calculator import Calculator
+# requirements.txt
+Flask
+```
 
-class TestCalculator(unittest.TestCase):
-    def setUp(self):
-        self.calc = Calculator()
+```python
+# Dockerfile
+FROM python:3.9-slim
 
-    def test_add(self):
-        self.assertEqual(self.calc.add([1, 2]), 3)
-        self.assertEqual(self.calc.add([-1, 1]), 0)
+# Set working directory to /app
+WORKDIR /app
 
-    def test_subtract(self):
-        self.assertEqual(self.calc.subtract([5, 3]), 2)
-        self.assertEqual(self.calc.subtract([0, 0]), 0)
+# Copy requirements file
+COPY requirements.txt .
 
-    def test_multiply(self):
-        self.assertEqual(self.calc.multiply([3, 4]), 12)
-        self.assertEqual(self.calc.multiply([5, 0]), 0)
+# Install dependencies
+RUN pip install -r requirements.txt
 
-    def test_divide(self):
-        self.assertEqual(self.calc.divide([10, 2]), 5)
-        with self.assertRaises(ZeroDivisionError):
-            self.calc.divide([1, 0])
+# Copy application code
+COPY app.py .
+COPY calculator_module.py .
 
-if __name__ == "__main__":
-    unittest.main()
+# Expose port
+EXPOSE 5000
+
+# Run command
+CMD ["python", "app.py"]
+```
+
+```yml
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calculator-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: calculator-app
+  template:
+    metadata:
+      labels:
+        app: calculator-app
+    spec:
+      containers:
+      - name: calculator-app
+        image: calculator-app:latest
+        ports:
+        - containerPort: 5000
+```
+
+```python
+# security_config.py
+import os
+
+class SecurityConfig:
+    def __init__(self):
+        self.secret_key = os.environ.get('SECRET_KEY')
+```
+
+```bash
+# Jenkinsfile
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                sh 'docker build -t calculator-app:latest .'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'kubectl apply -f deployment.yaml'
+            }
+        }
+    }
+}
 ```

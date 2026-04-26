@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 Documentation/
+v1_streamlit_ui.py/

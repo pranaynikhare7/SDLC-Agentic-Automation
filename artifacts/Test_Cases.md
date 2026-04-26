@@ -1,86 +1,104 @@
-# Test Cases for Simple Calculator
+# Test Cases for Simple Calculator App
 
-
-Here’s a comprehensive set of test cases for the Calculator application based on the provided code and the review comments. The test cases cover various edge cases, boundary conditions, positive and negative scenarios to ensure functional correctness, along with a few enhancements.
 
 ```python
 import unittest
-from calculator import Calculator
-from input_handler import InputHandler
+from calculator_module import Calculator
+import json
+from app import app
 
-class TestCalculator(unittest.TestCase):
-    def setUp(self):
-        self.calc = Calculator()
+class TestCalculatorModule(unittest.TestCase):
 
-    # Test cases for add method
     def test_add(self):
-        self.assertEqual(self.calc.add([1, 2]), 3)
-        self.assertEqual(self.calc.add([-1, 1]), 0)
-        self.assertEqual(self.calc.add([0, 0]), 0)
-        self.assertEqual(self.calc.add([3.5, 2.5]), 6.0)
-        self.assertEqual(self.calc.add([1, -1, 2, -2]), 0)  # More than two operands
+        calculator = Calculator()
+        self.assertEqual(calculator.add(10, 5), 15)
+        self.assertEqual(calculator.add(-10, 5), -5)
+        self.assertEqual(calculator.add(-10, -5), -15)
 
-    # Test cases for subtract method
     def test_subtract(self):
-        self.assertEqual(self.calc.subtract([5, 3]), 2)
-        self.assertEqual(self.calc.subtract([0, 0]), 0)
-        self.assertEqual(self.calc.subtract([10, 5]), 5)
-        self.assertEqual(self.calc.subtract([-1, -1]), 0)
-        self.assertEqual(self.calc.subtract([5, -5]), 10)  # Negative result
-        # Test for invalid input (more or less than two operands)
-        with self.assertRaises(IndexError):  # Expecting an error for incorrect number of operands
-            self.calc.subtract([3])                
+        calculator = Calculator()
+        self.assertEqual(calculator.subtract(10, 5), 5)
+        self.assertEqual(calculator.subtract(-10, 5), -15)
+        self.assertEqual(calculator.subtract(-10, -5), -5)
 
-    # Test cases for multiply method
     def test_multiply(self):
-        self.assertEqual(self.calc.multiply([3, 4]), 12)
-        self.assertEqual(self.calc.multiply([5, 0]), 0)
-        self.assertEqual(self.calc.multiply([-2, 3]), -6)
-        self.assertEqual(self.calc.multiply([1.5, 4]), 6.0)
-        self.assertEqual(self.calc.multiply([2, 3, 4]), 24)  # More than two operands
+        calculator = Calculator()
+        self.assertEqual(calculator.multiply(10, 5), 50)
+        self.assertEqual(calculator.multiply(-10, 5), -50)
+        self.assertEqual(calculator.multiply(-10, -5), 50)
 
-    # Test cases for divide method
     def test_divide(self):
-        self.assertEqual(self.calc.divide([10, 2]), 5)
-        self.assertEqual(self.calc.divide([5, -5]), -1.0)
-        self.assertEqual(self.calc.divide([-10, 5]), -2.0)
-        self.assertEqual(self.calc.divide([3.0, 2.0]), 1.5)
-        
+        calculator = Calculator()
+        self.assertEqual(calculator.divide(10, 2), 5)
+        self.assertEqual(calculator.divide(-10, 2), -5)
+        self.assertEqual(calculator.divide(-10, -2), 5)
         with self.assertRaises(ZeroDivisionError):
-            self.calc.divide([1, 0])
+            calculator.divide(10, 0)
 
-        # Edge case: dividing by a float close to zero
-        with self.assertRaises(ZeroDivisionError):
-            self.calc.divide([1, 1e-10])  # This test case can show how to handle very small denominators.
+class TestApp(unittest.TestCase):
 
-class TestInputHandler(unittest.TestCase):
+    def test_calculate_add(self):
+        tester = app.test_client()
+        data = {'num1': 10, 'num2': 5, 'operation': 'add'}
+        response = tester.post('/calculate', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.data)['result'], 15)
 
-    def test_validate_inputs(self):
-        # Valid inputs
-        InputHandler.validate_inputs([1, 2])
-        InputHandler.validate_inputs([1.5, 2.5])
+    def test_calculate_subtract(self):
+        tester = app.test_client()
+        data = {'num1': 10, 'num2': 5, 'operation': 'subtract'}
+        response = tester.post('/calculate', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.data)['result'], 5)
 
-        # Invalid inputs
-        with self.assertRaises(ValueError):
-            InputHandler.validate_inputs([1])  # Less than two operands
-            
-        with self.assertRaises(ValueError):
-            InputHandler.validate_inputs([1, 2, 3])  # More than two operands
-            
-        with self.assertRaises(ValueError):
-            InputHandler.validate_inputs(['a', 2])  # Non-numeric operand
-            
-        with self.assertRaises(ValueError):
-            InputHandler.validate_inputs([None, 3])  # Non-numeric operand
-        
-if __name__ == "__main__":
+    def test_calculate_multiply(self):
+        tester = app.test_client()
+        data = {'num1': 10, 'num2': 5, 'operation': 'multiply'}
+        response = tester.post('/calculate', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.data)['result'], 50)
+
+    def test_calculate_divide(self):
+        tester = app.test_client()
+        data = {'num1': 10, 'num2': 2, 'operation': 'divide'}
+        response = tester.post('/calculate', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.data)['result'], 5)
+
+    def test_calculate_divide_by_zero(self):
+        tester = app.test_client()
+        data = {'num1': 10, 'num2': 0, 'operation': 'divide'}
+        response = tester.post('/calculate', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(json.loads(response.data)['error'], 'Cannot divide by zero')
+
+    def test_calculate_invalid_operation(self):
+        tester = app.test_client()
+        data = {'num1': 10, 'num2': 5, 'operation': 'invalid'}
+        response = tester.post('/calculate', data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(json.loads(response.data)['error'], 'Invalid operation')
+
+    def test_healthcheck(self):
+        tester = app.test_client()
+        response = tester.get('/healthcheck')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.data)['status'], 'healthy')
+
+if __name__ == '__main__':
     unittest.main()
 ```
+This test suite covers the following scenarios:
 
-### Key Points in the Test Cases:
-1. **Various Input Types**: Tests include both integers and floats, and the handling of negations and zeros.
-2. **Boundary Conditions**: Edge cases like division by zero and handling more than two operands are explicitly tested.
-3. **Exception Handling**: Tests check the proper propagation of exceptions for invalid input and edge cases.
-4. **Validation of Inputs**: Input validation tests examine cases with fewer or more than the expected number of operands, including invalid data types.
+1.  **Calculator Module Tests**:
 
-These test cases are designed to ensure that all possible scenarios are covered and that the calculator functions correctly under expected and unexpected circumstances.
+    *   Test the `add`, `subtract`, `multiply`, and `divide` methods of the `Calculator` class with different input values, including positive and negative numbers.
+    *   Test the `divide` method with a divisor of zero to ensure it raises a `ZeroDivisionError`.
+2.  **App Tests**:
+
+    *   Test the `/calculate` endpoint with different operations (`add`, `subtract`, `multiply`, and `divide`) and input values.
+    *   Test the `/calculate` endpoint with an invalid operation to ensure it returns an error response.
+    *   Test the `/calculate` endpoint with a division by zero to ensure it returns an error response.
+    *   Test the `/healthcheck` endpoint to ensure it returns a healthy status.
+
+By running these tests, you can ensure the correctness and reliability of the calculator application.

@@ -1,235 +1,292 @@
-# Design Documents for Simple Calculator
+# Design Documents for Simple Calculator App
 
 ## Functional Design Document
-# Functional Design Document: Simple Calculator
-
+# Functional Design Document: Simple Calculator App
 ## 1. Overview and Objectives
-The objective of this document is to provide a comprehensive functional design for a Simple Calculator. This calculator will allow users to perform basic arithmetic operations: addition, subtraction, multiplication, and division. The aim is to create a straightforward tool that can accurately compute these operations while managing inputs effectively, particularly for division by zero.
+The Simple Calculator App is designed to perform basic arithmetic operations such as addition, subtraction, multiplication, and division through API calls or other programmatic means. The primary objective of this app is to provide a simple and efficient way to perform calculations without a user interface.
 
 ## 2. Scope Definition
-The Simple Calculator will focus on the following functionalities:
-- Basic arithmetic operations (Addition, Subtraction, Multiplication, Division)
-- Input handling for operations 
-- Error management and validation
-- No User Interface (UI); designed for backend or command-line use
+The scope of the Simple Calculator App includes:
+* Performing basic arithmetic operations (addition, subtraction, multiplication, and division)
+* Providing results through API calls or other programmatic means
+* No user interface
+* Support for basic mathematical operations
+
+The following are out of scope:
+* Advanced mathematical operations (e.g., trigonometry, calculus)
+* Support for complex numbers or matrices
+* User interface or graphical representation of calculations
 
 ## 3. Roles and Access Control
-- **Product Analyst**: Responsible for gathering requirements and ensuring all functionalities are defined.
-- **System Designer**: Responsible for outlining the architecture and design of the calculator.
-- **Developers**: Responsible for implementing the functionalities as per the design specifications.
-- **Quality Assurance (QA) Team**: Responsible for testing the calculator against defined user stories.
+Since the Simple Calculator App does not have a user interface, there are no user roles or access control mechanisms required. The app will be accessed programmatically through API calls, and access control will be handled by the calling application or system.
 
 ## 4. Functional Requirements Analysis
-### 4.1 User Stories
-| ID     | Title                                              | Description                                                                                                           | Priority | Acceptance Criteria                                                                                                                     |
-|--------|----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------|
-| US-001 | Implement Basic Addition Functionality             | As a user, I want to perform basic addition operations using the calculator, so that I can add two or more numbers. | 1        | Given two numbers, when the user inputs them into the calculator and selects the addition operation, then the calculator returns the correct sum. |
-| US-002 | Implement Basic Subtraction Functionality          | As a user, I want to perform basic subtraction operations using the calculator, so that I can subtract one number from another. | 1        | Given two numbers, when the user inputs them into the calculator and selects the subtraction operation, then the calculator returns the correct difference. |
-| US-003 | Implement Basic Multiplication Functionality       | As a user, I want to perform basic multiplication operations using the calculator, so that I can multiply two or more numbers. | 1        | Given two numbers, when the user inputs them into the calculator and selects the multiplication operation, then the calculator returns the correct product. |
-| US-004 | Implement Basic Division Functionality             | As a user, I want to perform basic division operations using the calculator, so that I can divide one number by another. | 1        | Given two numbers, when the user inputs them into the calculator and selects the division operation, then the calculator returns the correct quotient, with handling for division by zero. |
-
-### 4.2 Functional Requirements
-- The calculator must accept numeric input for operations.
-- It must provide functionality for addition (`+`), subtraction (`-`), multiplication (`*`), and division (`/`).
-- Division by zero must return an appropriate error message.
-- The calculator must return results in a correct numeric format.
+The following functional requirements have been identified:
+* **US-001: Basic Calculator Functionality**
+	+ The app should perform basic arithmetic operations (addition, subtraction, multiplication, and division)
+	+ The app should return the correct results for these operations
+* **US-002: No User Interface**
+	+ The app should not have a user interface
+	+ The app should provide results through API calls or other programmatic means
 
 ## 5. User Interface and Experience Guidelines
-Since there is no UI for this calculator, the interaction will primarily be through command line inputs. The user will invoke the calculator functions via predefined command-line arguments representing numbers and the operations to perform.
+Since the Simple Calculator App does not have a user interface, there are no user experience guidelines to define. The app will be accessed programmatically, and the calling application or system will handle any user interaction.
 
 ## 6. Business Workflow Processes
-1. User inputs numbers and selects an arithmetic operation.
-2. The system processes the input and performs the operation.
-3. The result is returned or an error message is provided (in the case of invalid input or division by zero).
+The Simple Calculator App will not have any business workflow processes, as it is a simple calculator app that performs basic arithmetic operations. The app will receive input through API calls, perform the calculation, and return the result.
 
 ## 7. Data Model and Relationships
-### 7.1 Data Inputs
-- **Operands**: Two numbers (floating-point or integer)
-- **Operation**: One of the following strings: `add`, `subtract`, `multiply`, `divide`
+The data model for the Simple Calculator App is simple and consists of the following elements:
+* **Operation**: The arithmetic operation to be performed (addition, subtraction, multiplication, or division)
+* **Operand1**: The first operand for the operation
+* **Operand2**: The second operand for the operation
+* **Result**: The result of the operation
 
-### 7.2 Outputs
-- **Result**: Numeric output (floating-point or integer)
+The relationships between these elements are as follows:
+* An operation is performed on two operands
+* The result is calculated based on the operation and operands
 
 ## 8. Data Validation and Business Rules
-- Validate that inputs are numeric.
-- Ensure that exactly two operands are provided for operations.
-- Handle division by zero by returning an error message.
-
-### Example Validation Logic
-```python
-def validate_inputs(operand1, operand2, operation):
-    if not (isinstance(operand1, (int, float)) and isinstance(operand2, (int, float))):
-        raise ValueError("Operands must be numeric.")
-    if operation == 'divide' and operand2 == 0:
-        raise ZeroDivisionError("Cannot divide by zero.")
-```
+The following data validation and business rules apply:
+* **Operation**: Must be one of the supported arithmetic operations (addition, subtraction, multiplication, or division)
+* **Operand1** and **Operand2**: Must be valid numbers
+* **Division by zero**: Is not allowed and will result in an error
 
 ## 9. Reporting and Analytics Requirements
-N/A for this project as it focuses solely on computational functionalities without tracking or reporting.
+There are no reporting or analytics requirements for the Simple Calculator App, as it is a simple calculator app that performs basic arithmetic operations.
 
 ## 10. System Integrations and Interfaces
-- No external integrations are required for the Simple Calculator. The functions will operate independently in a self-contained manner.
+The Simple Calculator App will provide a programmatic interface (API) for accessing the calculator functionality. The API will support the following operations:
+* `add(num1, num2)`: Performs addition
+* `subtract(num1, num2)`: Performs subtraction
+* `multiply(num1, num2)`: Performs multiplication
+* `divide(num1, num2)`: Performs division
 
----
+Example API calls:
+```python
+import requests
 
-This FDD outlines the necessary structure and requirements for the Simple Calculator, focusing entirely on its computational functionalities as specified. Further detail can be added as needed during the implementation phase.
+# Perform addition
+response = requests.post('http://calculator-api.com/add', json={'num1': 2, 'num2': 3})
+print(response.json())  # Output: 5
+
+# Perform subtraction
+response = requests.post('http://calculator-api.com/subtract', json={'num1': 5, 'num2': 2})
+print(response.json())  # Output: 3
+```
+Note: The actual API endpoint and implementation details will depend on the chosen programming language and framework.
 
 ## Technical Design Document
-# Technical Design Document: Simple Calculator
-
+# Technical Design Document: Simple Calculator App
 ## 1. System Architecture Overview
-The Simple Calculator is designed to be a lightweight application that performs basic arithmetic operations without a user interface. The architecture consists of the following components:
+The Simple Calculator App will be designed as a microservices-based architecture, with a single service responsible for performing calculations. The architecture will consist of the following layers:
+* Presentation Layer: None (as per the 'No UI' requirement)
+* Application Layer: Calculator Service
+* Data Access Layer: None (as the app will not store any data)
 
-- **Calculator Core**: This is the main component that handles calculation logic.
-- **Input Handler**: Processes input from users and validates it.
-- **Output Handler**: Presents the calculation results to users.
-- **Error Handler**: Manages exceptions and errors, including division by zero.
-
-### Architecture Diagram
-```
-+---------------------+
-|   Input Handler     |
-+----------+----------+
-           |
-           v
-+----------+----------+
-|   Calculator Core   |
-+----------+----------+
-           |
-           v
-+----------+----------+
-|   Output Handler    |
-+----------+----------+
-           |
-           v
-+----------+----------+
-|    Error Handler    |
-+---------------------+
-```
+The calculator service will expose APIs for performing calculations, which can be consumed by other applications or services.
 
 ## 2. Technology Stack and Rationale
-- **Programming Language**: Python
-  - Rationale: Python is easy to read, allows quick prototyping, and has built-in support for mathematical operations.
-  
-- **Development Environment**: Visual Studio Code
-  - Rationale: Provides a rich development experience with debugging, linting, and support for Python.
+The technology stack for the Simple Calculator App will include:
+* Programming Language: Python 3.9
+* Framework: Flask 2.0 (for building the API)
+* Database: None (as the app will not store any data)
 
-- **Version Control**: Git
-  - Rationale: Enables tracking of changes and collaboration with other developers.
-
-- **Testing Framework**: Unittest (Python's built-in module)
-  - Rationale: Facilitates easy creation of test cases to ensure code reliability.
+The rationale behind choosing Python as the programming language is its simplicity, readability, and ease of use. Flask is chosen as the framework for building the API due to its lightweight and flexible nature.
 
 ## 3. Data Model and Schema Design
-For the Simple Calculator, no complex data model is needed. However, we will define the structure for operator inputs and results:
+As the app will not store any data, there is no need for a data model or schema design. However, the API will accept and return data in JSON format. The data model for the API requests and responses will be as follows:
+### Request Data Model
+| Field Name | Data Type | Description |
+| --- | --- | --- |
+| num1 | float | The first number |
+| num2 | float | The second number |
+| operation | string | The arithmetic operation to perform |
 
-### Input Data Model
-- **Operands**: List of numbers (float)
-- **Operator**: String (one of "+", "-", "*", "/")
-
-### Output Data Model
-| Field        | Type     | Description                     |
-|--------------|----------|---------------------------------|
-| result       | float    | The result of the calculation   |
-| error        | string   | An error message if applicable  |
+### Response Data Model
+| Field Name | Data Type | Description |
+| --- | --- | --- |
+| result | float | The result of the calculation |
 
 ## 4. API Design and Specifications
-The API will expose endpoints to perform calculations. Each operation will be a separate function.
+The API will expose the following endpoints:
+* `POST /calculate`: Performs a calculation based on the request data
+* `GET /healthcheck`: Returns the health status of the service
 
-### Endpoints
-1. **Addition**
-   - **Path**: `/add`
-   - **Method**: POST
-   - **Request Body**: 
-   ```json
-   {
-     "operands": [number1, number2]
-   }
-   ```
-   - **Response**: 
-   ```json
-   {
-     "result": sum,
-     "error": null
-   }
-   ```
+The API request and response formats will be as follows:
+### Calculate API Request
+```json
+{
+    "num1": 10.0,
+    "num2": 5.0,
+    "operation": "add"
+}
+```
 
-2. **Subtraction**
-   - **Path**: `/subtract`
-   - **Method**: POST
-   - **Request Body**: 
-   ```json
-   {
-     "operands": [number1, number2]
-   }
-   ```
+### Calculate API Response
+```json
+{
+    "result": 15.0
+}
+```
 
-3. **Multiplication**
-   - **Path**: `/multiply`
-   - **Method**: POST
-   - **Request Body**: 
-   ```json
-   {
-     "operands": [number1, number2]
-   }
-   ```
+The API will be implemented using Flask, and the code will be as follows:
+```python
+from flask import Flask, request, jsonify
 
-4. **Division**
-   - **Path**: `/divide`
-   - **Method**: POST
-   - **Request Body**: 
-   ```json
-   {
-     "operands": [number1, number2]
-   }
-   ```
-   - **Response**:
-   ```json
-   {
-     "result": quotient,
-     "error": null
-   }
-   ```
-   - **Error Handling**: If division by zero is attempted, the response should return an error message.
+app = Flask(__name__)
+
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    data = request.get_json()
+    num1 = data['num1']
+    num2 = data['num2']
+    operation = data['operation']
+    
+    if operation == 'add':
+        result = num1 + num2
+    elif operation == 'subtract':
+        result = num1 - num2
+    elif operation == 'multiply':
+        result = num1 * num2
+    elif operation == 'divide':
+        if num2 == 0:
+            return jsonify({'error': 'Cannot divide by zero'}), 400
+        result = num1 / num2
+    else:
+        return jsonify({'error': 'Invalid operation'}), 400
+    
+    return jsonify({'result': result})
+
+@app.route('/healthcheck', methods=['GET'])
+def healthcheck():
+    return jsonify({'status': 'healthy'})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
 
 ## 5. Security Architecture and Controls
-- **Input Validation**: Ensure all inputs are validated to prevent injection attacks and errors.
-- **Error Handling**: Graceful handling of exceptions to prevent application crashes and provide user-friendly error messages.
+The security architecture for the Simple Calculator App will include:
+* Authentication: None (as the app will not store any user data)
+* Authorization: None (as the app will not store any user data)
+* Data Encryption: None (as the app will not store any data)
+* Input Validation: The app will validate the input data to ensure it is in the correct format and range
+
+The security controls will be implemented using Flask-Security, and the code will be as follows:
+```python
+from flask_security import Security, SQLAlchemyUserDatastore
+
+# Initialize the security extension
+security = Security(app, user_datastore)
+```
 
 ## 6. Performance Optimization Strategies
-- **Efficient Algorithms**: Use built-in operators for calculations as they are optimized in Python's core.
-- **Resource Management**: Ensure minimal memory usage by limiting the scope and lifecycle of variables.
+The performance optimization strategies for the Simple Calculator App will include:
+* Caching: The app will use caching to store the results of frequent calculations
+* Load Balancing: The app will use load balancing to distribute the traffic across multiple instances
+* Database Indexing: Not applicable (as the app will not store any data)
+
+The caching will be implemented using Flask-Caching, and the code will be as follows:
+```python
+from flask_caching import Cache
+
+# Initialize the caching extension
+cache = Cache(app, config={'CACHE_TYPE': 'SimpleCache'})
+```
 
 ## 7. Scalability and Reliability Approach
-- **Stateless Design**: Ensures that the calculator can handle multiple requests without retaining state, enabling horizontal scaling.
-- **Logging**: Implement logging to monitor errors and performance metrics for troubleshooting and optimization.
+The scalability and reliability approach for the Simple Calculator App will include:
+* Horizontal Scaling: The app will be designed to scale horizontally by adding more instances
+* Vertical Scaling: The app will be designed to scale vertically by increasing the resources of each instance
+* Load Balancing: The app will use load balancing to distribute the traffic across multiple instances
+* Fault Tolerance: The app will be designed to be fault-tolerant by using multiple instances and load balancing
+
+The scalability and reliability will be implemented using Docker and Kubernetes, and the code will be as follows:
+```yml
+# Dockerfile
+FROM python:3.9-slim
+
+# Install the dependencies
+RUN pip install -r requirements.txt
+
+# Expose the port
+EXPOSE 5000
+
+# Run the app
+CMD ["flask", "run", "--host=0.0.0.0"]
+```
+
+```yml
+# Kubernetes Deployment YAML
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calculator-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: calculator-app
+  template:
+    metadata:
+      labels:
+        app: calculator-app
+    spec:
+      containers:
+      - name: calculator-app
+        image: calculator-app:latest
+        ports:
+        - containerPort: 5000
+```
 
 ## 8. Deployment and Release Strategy
-- **Environment**: Deploy the calculator on cloud services, such as AWS Lambda, for serverless execution.
-- **Continuous Integration/Continuous Deployment (CI/CD)**: Use tools like GitHub Actions to automate tests and deployment processes.
+The deployment and release strategy for the Simple Calculator App will include:
+* Continuous Integration: The app will be built and tested using a CI pipeline
+* Continuous Deployment: The app will be deployed to production using a CD pipeline
+* Rollback Strategy: The app will have a rollback strategy in place in case of any issues
+
+The deployment and release will be implemented using Jenkins and Kubernetes, and the code will be as follows:
+```groovy
+// Jenkinsfile
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                sh 'docker build -t calculator-app:latest .'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'kubectl apply -f deployment.yaml'
+            }
+        }
+    }
+}
+```
 
 ## 9. External Integrations and Dependencies
-- **Testing Libraries**: Integrate `unittest` for testing and `requests` for API handling in the development phase.
-  
+The Simple Calculator App will have the following external integrations and dependencies:
+* None (as the app will not integrate with any external services)
+
 ## 10. Environment Setup (Development, Testing, Production)
-### Development Environment Setup
-1. Install Python 3.x from the official website.
-2. Set up a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows use venv\Scripts\activate
-   ```
+The environment setup for the Simple Calculator App will include:
+* Development: The app will be developed using a local environment with Flask and Python
+* Testing: The app will be tested using a testing environment with Pytest and Flask-Testing
+* Production: The app will be deployed to a production environment using Docker and Kubernetes
 
-3. Install dependencies:
-   ```bash
-   pip install requests flask  # Flask for creating a simple server
-   ```
+The environment setup will be implemented using the following code:
+```bash
+# Development Environment
+pip install -r requirements.txt
+flask run --host=0.0.0.0
 
-### Testing Environment Setup
-- Utilize the same setup as the development environment, running tests using the `unittest` framework.
+# Testing Environment
+pip install -r requirements.txt
+pytest
 
-### Production Environment Setup
-- Use Docker to containerize the application for easy deployment.
-- Configure the necessary environment variables for secure and optimized operations.
-
-This Technical Design Document serves as a blueprint for developing a Simple Calculator, ensuring all aspects of the architecture, design, and implementation are well-defined and organized.
+# Production Environment
+docker build -t calculator-app:latest .
+kubectl apply -f deployment.yaml
+```
